@@ -13,8 +13,9 @@ class Owner_Commands(commands.Cog):
     @permissions.is_owner()
     async def exit(self,ctx):
         await ctx.respond("Exiting!")
-        log.alert("Exit Command executed by: " + ctx.author.name)
-        exit()
+        log.alert(f"Exit Command executed by: {ctx.author.name}#{ctx.author.id}")
+        await self.bot.close()
+        
 
 def setup(bot):
     bot.add_cog(Owner_Commands(bot))
