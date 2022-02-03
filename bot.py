@@ -5,8 +5,8 @@ from discord.embeds import Embed
 import utils.osUtils as osu
 import utils.consoleLogger as log
 from decouple import config
-
-# from discord import discord
+from cogs.dictionary import dictionary as dic
+from discord.ext import commands
 
 dgid = osu.get_debug_guilds()
 
@@ -32,7 +32,7 @@ def loadAllCogs():
 async def on_ready():
     log.info(f"Logged on as : {bot.user.name}")
     log.alert(f"Slash commands active on : {dgid}")
- 
+
 
 @bot.command()
 async def chart(ctx):

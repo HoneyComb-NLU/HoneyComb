@@ -1,17 +1,14 @@
 from datetime import datetime
-from email import header
-from urllib import response
 import discord
 from discord.ext import commands
 from discord.commands import slash_command,message_command,user_command
 import requests
 import utils.osUtils as osu
 from requests.structures import CaseInsensitiveDict
-import utils.dynamicDictionary as dd
 
 dict_url = "https://owlbot.info/api/v4/dictionary/"
 
-class dictionaey(commands.Cog):
+class dictionary(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
 
@@ -88,5 +85,6 @@ class dictionaey(commands.Cog):
             )
             await ctx.respond(embed=embed)
 
+
 def setup(bot):
-    bot.add_cog(dictionaey(bot))
+    bot.add_cog(dictionary(bot))
