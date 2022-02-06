@@ -1,28 +1,72 @@
+from calendar import c
+from mimetypes import init
 from pycoingecko import CoinGeckoAPI
+import sqlite3
 import discord 
 import utils.consoleLogger as log
+import utils.osUtils as osu
+db_url = osu.get_db()
+# db_url = ".\database\database.db"
 
 cg = CoinGeckoAPI()
+#-------- NLU/NLP Channel list --------#
+cached_nlu_channels = []
+
+def load_cache_channel():
+    # on_ready
+    dbCon = sqlite3.connect(db_url)
+    cur = dbCon.cursor()
+    cur.execute("""CREATE TABLE IF NOT EXISTS guilds (
+        guild_id BIGINT PRIMARY KEY,
+        name TEXT NOT NULL,
+        nlu_channel_id BIGINT
+    )""")
+    
+
+    cached_nlu_channels = [each[0] for each in cur.execute("""SELECT nlu_channel_id FROM guilds""").fetchall()]
+    # print(cached_nlu_channels)
+    
+    dbCon.commit()
+    dbCon.close()
+    return cached_nlu_channels
+
 # -------- On_StartUp -------- #
 def write_coin_list():
-    with open("./database/coin_list.json", 'w') as cl:
-        cl.write(cg.get_coins_list())
-    log.success("Coin List successfully refreshed!")
+    dbCon = sqlite3.connect(db_url)
+    cur = dbCon.cursor()
+    
+    cl = cg.get_coins_list()
+    cur.execute("""CREATE TABLE IF NOT EXISTS coin_list (id TEXT PRIMARY KEY,symbol TEXT NOT NULL, name TEXT NOT NULL)""")
+    if cur.execute("SELECT COUNT(*) FROM coin_list").fetchall()[0][0] == len(cl):
+        log.alert("Ignoring coin list Updation.")
+    else:
+        cur.execute("DELETE FROM coin_list")
+        for each in cl:
+            cur.execute(f'INSERT INTO coin_list VALUES ("{each["id"]}","{each["symbol"]}","{each["name"]}")')
 
-def write_coin_catergory_list():
-    with open("./database/coin_category_list.json", 'w') as ccl:
-        ccl.write(cg.get_coins_categories_list())
-    log.success("Coin Category list successfully refreshed!")
+        log.success("Coin list successfully refreshed! New supported amount of coins: " + str(len(cl)))
+    
+    dbCon.commit()
+    dbCon.close()
 
 def write_supported_currencies():
-    with open("./database/supported_currencies.json", 'w') as sc:
-        sc.write(cg.get_supported_vs_currencies())
-    log.success("Supported Currency list successfully refreshed!")
+    dbCon = sqlite3.connect(db_url)
+    cur = dbCon.cursor()
+    
+    gsc = cg.get_supported_vs_currencies()
+    cur.execute("""CREATE TABLE IF NOT EXISTS supported_currencies (id TEXT)""")
+    
+    if cur.execute("SELECT COUNT(*) FROM supported_currencies").fetchall()[0][0] == len(gsc):
+        log.alert("Ignoring supported currency Updation.")
+    else:
+        cur.execute("DELETE FROM supported_currencies")
+        for each in gsc:
+            cur.execute('INSERT INTO supported_currencies VALUES ("{0}")'.format(each))
 
-def write_indexes_list():
-    with open("./database/index_list.json", 'w') as il:
-        il.write(cg.get_indexes_list())
-    log.success("Index List successfully refreshed!")
+        log.success("Supported Currency list successfully refreshed!")
+
+    dbCon.commit()
+    dbCon.close()
 
 # -------- Basic Info -------- #
 def get_top_company_holdings(coin_id:str):
@@ -46,5 +90,6 @@ f"""```yml
 ⩺ % of Total Supply: {each["percentage_of_total_supply"]}
 ```""",inline=False
 )
+        embed.set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
     return embed
     

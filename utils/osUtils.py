@@ -13,6 +13,9 @@ def get_all_cogs():
 def get_debug_guilds():
     return list(map(int,config("DEBUG_GUILDS")[1:-1].split(",")))
 
+def get_db():
+    return str(config("DB_URL"))
+    
 
 def get_dict_key():
     return config("DICT_KEY")

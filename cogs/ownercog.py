@@ -5,6 +5,8 @@ from discord.commands import slash_command,message_command,user_command,CommandP
 from discord.commands import permissions
 import utils.consoleLogger as log
 import discord.ext.commands.cooldowns as cd
+import utils.CryptoUtils as cu
+
 
 class Owner_Commands(commands.Cog,name="Owner Commands"):
     def __init__(self,bot):
@@ -17,12 +19,13 @@ class Owner_Commands(commands.Cog,name="Owner Commands"):
         log.alert(f"Exit Command executed by: {ctx.author.name}#{ctx.author.discriminator}")
         await self.bot.close()
     
-    @slash_command(default_permission=False,description="Refresh all the Startup Lists Manually.")
-    @permissions.is_owner()
-    @commands.cooldown(1,10,commands.BucketType.user)
-    async def refresh(self,ctx):        
-        await ctx.respond("All Lists are being refreshed!")
-        log.alert(f"Refresh Command executed by: {ctx.author.name}#{ctx.author.discriminator}")
+    # @slash_command(default_permission=False,description="Refresh all the Startup Lists Manually.")
+    # @permissions.is_owner()
+    # @commands.cooldown(1,10,commands.BucketType.user)
+    # async def refresh(self,ctx):        
+        
+    #     await ctx.respond(embed=discord.Embed(title=""))
+    #     log.alert(f"Refresh Command executed by: {ctx.author.name}#{ctx.author.discriminator}")
 
 
 def setup(bot):

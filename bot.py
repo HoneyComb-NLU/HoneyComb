@@ -1,5 +1,5 @@
 from datetime import datetime
-import discord as dc
+import discord 
 from discord import file
 from discord.embeds import Embed
 import utils.osUtils as osu
@@ -10,9 +10,9 @@ from discord.ext import commands
 
 dgid = osu.get_debug_guilds()
 
-bot = dc.Bot(
-    activity=dc.Activity(type=dc.ActivityType.listening,name="Slash Commands ;-;"),
-    status=dc.Status.dnd,
+bot = discord.Bot(
+    activity=discord.Activity(type=discord.ActivityType.listening,name="Slash Commands ;-;"),
+    status=discord.Status.dnd,
     debug_guilds=dgid,
     owner_id=474589812192575488
 )
@@ -22,7 +22,7 @@ def loadAllCogs():
     for each in dir:
         try:
             bot.load_extension(f"cogs.{each}")
-        except dc.ExtensionError as dce:
+        except discord.ExtensionError as dce:
             log.error(each.capitalize() + " cog loading Failed!")
             print(str(dce))
         else:
@@ -33,18 +33,38 @@ async def on_ready():
     log.info(f"Logged on as : {bot.user.name}")
     log.alert(f"Slash commands active on : {dgid}")
 
+@bot.event
+async def on_guild_join(guild):
+    embed = discord.Embed(
+        title="**Hey!! It's me, HoneyComb**.",
+        timestamp=datetime.now(),
+        description="""~~---------------------------------------------------------------------------------------------~~
+First of all, __Thanks for adding me!__
+I'm built to be your one stop solution for all your Crypto-currency related queries 
+& I will try my level best to understand your Queries.
+~~---------------------------------------------------------------------------------------------~~
+**There are some things you should keep in mind while interacting with me.**
+`⁕` I work in 2 modes, `Slash Command mode` & `Natural language mode`.
+`⁕` Every command has a certain cooldown.
+`⁕` Natural language mode requires a special channel which should have atleast 30 seconds of [slow mode](https://support.discord.com/hc/en-us/articles/360016150952-Slowmode-Slllooowwwiiinng-down-your-channel).
+`⁕` In order to use natural language mode use `/setchannel <channel>`.
+`⁕` Natural language mode operates in **English only**. 
+~~---------------------------------------------------------------------------------------------~~
+Feel free to use `/help` if you get stuck.
+""",
+        color=discord.Color.gold()
+    ).set_footer(text="By Team Hive Minds",icon_url=bot.user.avatar.url)
+    log.info("New Guild : " + guild.name)
+    await guild.system_channel.send(embed=embed)
 
 @bot.command()
 async def chart(ctx):
-    em = dc.Embed(title="Tether",description="Tether is a very popular Crypto-Currency!",color=dc.Color.gold())
-    file = dc.File("./assets/prices.png",filename="lolPrices.png")
+    em = discord.Embed(title="Tether",description="Tether is a very popular Crypto-Currency!",color=discord.Color.gold())
+    file = discord.File("./assets/prices.png",filename="lolPrices.png")
     em.set_image(url="attachment://lolPrices.png")
     await ctx.respond(file=file,embed=em)
 
 
-# @bot.command()
-# async def owner(ctx):
-#     await ctx.respond(bot.owner_ids.set())
 
 loadAllCogs()
 
@@ -59,9 +79,9 @@ bot.run(config("BOT_TOKEN"))
 #     else:
 #         try:
 #             bot.load_extension(f"cogs.{cog}")
-#         except dc.ExtensionAlreadyLoaded:
+#         except discord.ExtensionAlreadyLoaded:
 #             log.alert("Extension is alreay Loaded.")
-#         except dc.ExtensionError:
+#         except discord.ExtensionError:
 #             log.error("Extension Error occured while loading " + cog)
 #         else:
 #             log.success(cog + " cog loaded Successfully!")
@@ -91,13 +111,13 @@ bot.run(config("BOT_TOKEN"))
 ## Message Command
 
 # @bot.message_command(name="Repeat",guild_ids=dgid)
-# async def messageRepeat(ctx,message: dc.Message):
+# async def messageRepeat(ctx,message: discord.Message):
 #     await ctx.respond(f'{message.content}')
 
 ## User Command
 
 # @bot.user_command(name="Greet",guild_ids=dgid)
-# async def userlol(ctx, user: dc.User):
+# async def userlol(ctx, user: discord.User):
 #     await ctx.respond("Hello! "+user.mention)
 
 
@@ -105,9 +125,9 @@ bot.run(config("BOT_TOKEN"))
 
 # @bot.command(guild_ids=dgid)
 # async def chart(ctx):
-#     em = dc.Embed(title="Hmmm Embed",description="hmmmmmm",color=dc.Color.blurple())
-#     file = dc.File("./assets/prices.png",filename="lolPrices.png")
+#     em = discord.Embed(title="Hmmm Embed",description="hmmmmmm",color=discord.Color.blurple())
+#     file = discord.File("./assets/prices.png",filename="lolPrices.png")
 #     em.set_image(url="attachment://lolPrices.png")
 #     await ctx.respond(file=file,embed=em)
-#     # await ctx.send(file=dc.File("./assets/prices.png"))
+#     # await ctx.send(file=discord.File("./assets/prices.png"))
 
