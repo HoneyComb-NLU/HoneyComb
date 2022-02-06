@@ -1,34 +1,40 @@
-from calendar import c
-from mimetypes import init
 from pycoingecko import CoinGeckoAPI
 import sqlite3
 import discord 
 import utils.consoleLogger as log
 import utils.osUtils as osu
+
 db_url = osu.get_db()
 # db_url = ".\database\database.db"
 
 cg = CoinGeckoAPI()
 #-------- NLU/NLP Channel list --------#
-cached_nlu_channels = []
-
 def load_cache_channel():
     # on_ready
     dbCon = sqlite3.connect(db_url)
     cur = dbCon.cursor()
     cur.execute("""CREATE TABLE IF NOT EXISTS guilds (
         guild_id BIGINT PRIMARY KEY,
-        name TEXT NOT NULL,
         nlu_channel_id BIGINT
     )""")
-    
-
     cached_nlu_channels = [each[0] for each in cur.execute("""SELECT nlu_channel_id FROM guilds""").fetchall()]
-    # print(cached_nlu_channels)
     
     dbCon.commit()
     dbCon.close()
     return cached_nlu_channels
+
+def add_nlu_channel(guild_id:int,nlu_channel_id:int):
+    dbCon = sqlite3.connect(db_url)
+    cur = dbCon.cursor()
+    try:
+        cur.execute(f"""INSERT INTO guilds values ({guild_id},{nlu_channel_id})""")
+    except sqlite3.IntegrityError:
+        cur.execute(f"""DELETE FROM guilds WHERE guild_id={guild_id}""")
+        cur.execute(f"""INSERT INTO guilds values ({guild_id},{nlu_channel_id})""")
+        # print("lol")
+    dbCon.commit()
+    dbCon.close()
+
 
 # -------- On_StartUp -------- #
 def write_coin_list():

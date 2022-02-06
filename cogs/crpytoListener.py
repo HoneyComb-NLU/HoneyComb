@@ -3,36 +3,32 @@ import discord
 from discord.ext import commands
 from discord.commands import slash_command,message_command,user_command
 import utils.CryptoUtils as cu
+import utils.databaseUtils as dbu
 from requests.exceptions import HTTPError
 
-ProductionStage = True
-cst = []
 class cryproListener(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
-        cst = cu.load_cache_channel()
-        if ProductionStage:
-            cu.write_coin_list()
-            cu.write_supported_currencies()
+        # force_reload_nlu()
+        cached_nlu_channels = dbu.get_nlu_channels()
+        print("Current Cached: " + str(cached_nlu_channels))
+        cu.write_coin_list()
+        cu.write_supported_currencies()
 
     @commands.Cog.listener()
     async def on_message(self,message):
-        if message.author.bot:
+        if message.author.bot or message.channel.id not in dbu.get_nlu_channels():
             return
-        await message.channel.send(cu.cached_nlu_channels)
-        await message.channel.send(cst)
-        pass
+        # TODO:- main
+        await message.channel.send("Requesting NLU server...")
+        
 
     @commands.Cog.listener()
     async def on_application_command_error(self,ctx,error):
-        if isinstance(error,commands.CommandOnCooldown):
-            # if ctx.author.id in self.bot.owner_ids:
-            #     await ctx.reinvoke()
-            #     await ctx.send("sorry Boss!")
-            
+        if isinstance(error,commands.CommandOnCooldown):            
             embed = discord.Embed(
                 title="Command Cooldown!",
                 description=error,
