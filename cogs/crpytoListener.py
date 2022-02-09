@@ -5,6 +5,7 @@ from discord.commands import slash_command,message_command,user_command
 import utils.CryptoUtils as cu
 import utils.databaseUtils as dbu
 from requests.exceptions import HTTPError
+import utils.consoleLogger as log
 
 class cryproListener(commands.Cog):
     def __init__(self,bot):
@@ -20,20 +21,21 @@ class cryproListener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self,message):
-        delay_check = message.channel.slowmode_delay < 30
-        if message.author.bot or message.channel.id not in dbu.get_nlu_channels() or delay_check:
-            if delay_check:
-                em = discord.Embed(title="Slowmode not detected!",description="""In order to use Natural language mode you will need to have a minimum of 30 seconds [slow mode](https://support.discord.com/hc/en-us/articles/360016150952-Slowmode-Slllooowwwiiinng-down-your-channel)""")
-                await message.channel.send(embed=em)
+        delay_check_fail = message.channel.slowmode_delay < 30
+        if message.author.bot or message.channel.id not in dbu.get_nlu_channels():
             return
-        
+        if delay_check_fail:
+            em = discord.Embed(title="Slowmode not detected!",description="""In order to use Natural language mode you will need to have a minimum of 30 seconds slow mode...\n\n*Silently enables slowmode... hehehehe...*""",color=discord.Color.red())
+            await message.channel.send(embed=em)
+            await message.channel.edit(slowmode_delay=30)
+            return
+            
+        # async with message.channel.typing():
+        # # simulate something heavy
+        #     # TODO:- main
+        #     await asyncio.sleep(3)
 
-        async with message.channel.typing():
-        # simulate something heavy
-            # TODO:- main
-            await asyncio.sleep(3)
-
-        await message.channel.send("Requesting NLU server...")
+        await message.channel.send("Requesting NLU server...",embed=cu.get_price("bitcoin,litecoin,smooth-love-potion","inr,jpy",True))
         # Smooth Love Potion -> smooth-love-potion
 
     @commands.Cog.listener()
@@ -54,7 +56,7 @@ class cryproListener(commands.Cog):
             await ctx.respond(embed=embed)
 
         else:
-            raise error
+            log.error(error)
 
 def setup(bot):
     bot.add_cog(cryproListener(bot))

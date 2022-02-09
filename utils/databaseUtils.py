@@ -9,3 +9,11 @@ def get_nlu_channels():
     dbCon.close()
     return nlu_channels
 
+def get_currencies():
+    dbCon = sqlite3.connect(osu.get_db())
+    cur = dbCon.cursor()
+    currency_list = [each[0] for each in cur.execute("SELECT * from supported_currencies").fetchall()]
+    # print(list(cur.execute("SELECT * from supported_currencies")))
+    dbCon.commit()
+    dbCon.close()
+    return currency_list

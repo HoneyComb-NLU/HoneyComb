@@ -3,6 +3,8 @@ import sqlite3
 import discord 
 import utils.consoleLogger as log
 import utils.osUtils as osu
+import utils.databaseUtils as dbu
+
 
 db_url = osu.get_db()
 # db_url = ".\database\database.db"
@@ -74,7 +76,7 @@ def write_supported_currencies():
     dbCon.commit()
     dbCon.close()
 
-# -------- Basic Info -------- #
+# -------- Main Stuff -------- #
 def get_top_company_holdings(coin_id:str):
     data = cg.get_companies_public_treasury_by_coin_id(coin_id=coin_id)
     data = data['companies']
@@ -99,3 +101,38 @@ f"""```yml
         embed.set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
     return embed
     
+def get_supported_currencies():
+    data = dbu.get_currencies()
+    rString = "```"
+    for i in range(1,len(data)+1):
+        rString += f"{data[i-1].upper()}"
+        if (i % 5 == 0):
+            rString += "\n"
+        else:
+            rString += " | "
+    rString += "```"
+    emb = discord.Embed(
+        title="Supported Currencies",
+        description=rString
+    )
+    return emb
+
+def get_price(id:str,vs_currency:str,mkt_cap=False):
+    # TODO:- Add Database checking to avoid waste of queries
+    data = cg.get_price(ids=id.lower(),vs_currencies=vs_currency.lower(),include_market_cap=mkt_cap)
+    id = id.replace(", ",",").replace(" ","-").split(",")
+    vs_currency = str(vs_currency).replace(", ",",").replace(" ","-").split(",")
+    embed = discord.Embed(title="Here are the price(s) you asked!",color=discord.Color.gold())
+
+    for i in id:
+        tempString = ""
+        for j in vs_currency:
+            tempString += f"""```yml
+Price in {j.upper()}: {round(data[i][j],2)}\n"""
+            if mkt_cap:
+                tempString += f"""Total Market Cap: {round(data[i][f"{j}_market_cap"],2)}"""
+
+            tempString += "```" 
+        embed.add_field(name=i.capitalize().replace("-"," "),value=tempString,inline=False)
+    
+    return embed
