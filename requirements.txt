@@ -1,6 +1,7 @@
-decouple
+python-decouple
 requests
-pip install -U git+https://github.com/Pycord-Development/pycord
+-U git+https://github.com/Pycord-Development/pycord
 colorama
 pycoingecko
-sqlite3
+websocket-client
+smartapi-python

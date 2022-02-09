@@ -1,4 +1,4 @@
-from aiohttp import request
+import asyncio
 import discord
 from discord.ext import commands
 from discord.commands import slash_command,message_command,user_command
@@ -20,11 +20,21 @@ class cryproListener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self,message):
-        if message.author.bot or message.channel.id not in dbu.get_nlu_channels():
+        delay_check = message.channel.slowmode_delay < 30
+        if message.author.bot or message.channel.id not in dbu.get_nlu_channels() or delay_check:
+            if delay_check:
+                em = discord.Embed(title="Slowmode not detected!",description="""In order to use Natural language mode you will need to have a minimum of 30 seconds [slow mode](https://support.discord.com/hc/en-us/articles/360016150952-Slowmode-Slllooowwwiiinng-down-your-channel)""")
+                await message.channel.send(embed=em)
             return
-        # TODO:- main
-        await message.channel.send("Requesting NLU server...")
         
+
+        async with message.channel.typing():
+        # simulate something heavy
+            # TODO:- main
+            await asyncio.sleep(3)
+
+        await message.channel.send("Requesting NLU server...")
+        # Smooth Love Potion -> smooth-love-potion
 
     @commands.Cog.listener()
     async def on_application_command_error(self,ctx,error):
