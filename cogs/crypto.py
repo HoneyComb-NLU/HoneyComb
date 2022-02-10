@@ -1,6 +1,7 @@
 from pydoc import describe
 from random import choices
 import utils.CryptoUtils as cu
+import utils.databaseUtils as dbu
 import discord
 import cogs.crpytoListener as cc
 from discord.commands import slash_command,Option
@@ -40,17 +41,16 @@ class Crypto(commands.Cog):
     @slash_command(description="Get the current price of any listed crytpocurrencies in any supported currencies.")
     @commands.cooldown(1,30,commands.BucketType.user)
     async def price(self,ctx,id: Option(str,description="Id of coins, comma-separated if querying more than 1 coin",required=True),
-    currency: Option(str,description="Conversion currency, comma-separated if querying more than 1 currency",required=True),
+    currency: Option(str,description="Conversion currency, comma-separated if querying more than 1 currency. [/supported_currencies]",required=True),
     market_cap: Option(bool,description="Whether you want Market capitalization info of the coin(s)",required=False)):
         await ctx.respond(embed=cu.get_price(id,currency,market_cap))
 
     @price.error
     async def err(self,ctx,error):
-        print("rrr")
         if isinstance(error,discord.ApplicationCommandInvokeError):
             await ctx.respond(embed=discord.Embed(
                 title="Token Name Error",
-                description="Please input Valid crypto id. \n`Eg. smooth-love-potion`",
+                description="Please input **valid** crypto/exchange id.",
                 color=discord.Color.red()
             ))
 

@@ -1,12 +1,11 @@
 from datetime import datetime
 import discord 
 from discord import file
-from discord.embeds import Embed
 import utils.osUtils as osu
 import utils.consoleLogger as log
 from decouple import config
-from cogs.dictionary import dictionary as dic
 from discord.ext import commands
+import utils.databaseUtils as dbu
 
 dgid = osu.get_debug_guilds()
 
@@ -54,15 +53,20 @@ Feel free to use `/help` if you get stuck.
 """,
         color=discord.Color.gold()
     ).set_footer(text="By Team Hive Minds",icon_url=bot.user.avatar.url)
-    log.info("New Guild : " + guild.name)
+    log.info("[⇉] New Guild : " + guild.name)
     await guild.system_channel.send(embed=embed)
 
-@bot.command()
-async def chart(ctx):
-    em = discord.Embed(title="Tether",description="Tether is a very popular Crypto-Currency!",color=discord.Color.gold())
-    file = discord.File("./assets/prices.png",filename="lolPrices.png")
-    em.set_image(url="attachment://lolPrices.png")
-    await ctx.respond(file=file,embed=em)
+@bot.event
+async def on_guild_remove(guild):
+    dbu.remove_guild(guild.id)
+    log.info("[⇇] Guild Leaved : " + guild.name)
+
+# @bot.command()
+# async def chart(ctx):
+#     em = discord.Embed(title="Tether",description="Tether is a very popular Crypto-Currency!",color=discord.Color.gold())
+#     file = discord.File("./assets/prices.png",filename="lolPrices.png")
+#     em.set_image(url="attachment://lolPrices.png")
+#     await ctx.respond(file=file,embed=em)
 
 
 

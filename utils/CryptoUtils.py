@@ -1,15 +1,20 @@
+from datetime import datetime
 from pycoingecko import CoinGeckoAPI
 import sqlite3
-import discord 
+import discord
+from pyparsing import col 
 import utils.consoleLogger as log
 import utils.osUtils as osu
 import utils.databaseUtils as dbu
+from tabulate import tabulate as tb
 
 
 db_url = osu.get_db()
 # db_url = ".\database\database.db"
+# embed.set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
 
 cg = CoinGeckoAPI()
+
 #-------- NLU/NLP Channel list --------#
 def load_cache_channel():
     # on_ready
@@ -88,51 +93,60 @@ def get_top_company_holdings(coin_id:str):
     embed = discord.Embed(title=f"Top {count} " + coin_id.capitalize() + " holding companies.",color=discord.Color.gold())
     for i in range(count):
         each = data[i]
+        val_list = [
+            ["Total Holding", each["total_holdings"]],
+            ["Entry Value", each["total_entry_value_usd"]],
+            ["Current Value", each["total_current_value_usd"]],
+            ["% Of Total Supply", each["percentage_of_total_supply"]]
+        ]
         embed.add_field(
             name=f"{i+1} | " + each["name"] + " | :flag_{0}:".format(each["country"].lower().replace("japan","jp")),
-            value=
-f"""```yml
-⩺ Total Holding: {each["total_holdings"]} 
-⩺ Entry Value: {each["total_entry_value_usd"]} 
-⩺ Current Value: {each["total_current_value_usd"]} 
-⩺ % of Total Supply: {each["percentage_of_total_supply"]}
-```""",inline=False
-)
+            value=f"""```ml\n{tb(val_list,tablefmt="fancy_grid",numalign="center",floatfmt=(".3f"))}```""",inline=False)
         embed.set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
     return embed
     
 def get_supported_currencies():
-    data = dbu.get_currencies()
-    rString = "```"
-    for i in range(1,len(data)+1):
-        rString += f"{data[i-1].upper()}"
-        if (i % 5 == 0):
-            rString += "\n"
-        else:
-            rString += " | "
-    rString += "```"
+    data = dbu.get_all_currencies()
+    nl = []
+    for i in range(len(data)):
+        if i % 7 == 0:
+            nl.append([])
+        nl[-1].append(data[i].upper())
+    # print(nl)
     emb = discord.Embed(
         title="Supported Currencies",
-        description=rString
+        description=f"```\n{tb(nl,tablefmt='fancy_grid')}```"
     )
     return emb
 
 def get_price(id:str,vs_currency:str,mkt_cap=False):
     # TODO:- Add Database checking to avoid waste of queries
-    data = cg.get_price(ids=id.lower(),vs_currencies=vs_currency.lower(),include_market_cap=mkt_cap)
-    id = id.replace(", ",",").replace(" ","-").split(",")
-    vs_currency = str(vs_currency).replace(", ",",").replace(" ","-").split(",")
-    embed = discord.Embed(title="Here are the price(s) you asked!",color=discord.Color.gold())
+    # ----- Limit ------- #
+    if id.count(',') > 10 or vs_currency.count(",") > 5:
+        err = discord.Embed(title="Woaahh! Why are you so Data-Hungry...",description="You can only request up to **10** ids & **5** Exchange currencies at a time.",
+        color=discord.Color.red(),timestamp=datetime.now())
+        return err
+
+    id = id.replace(", ",",").replace(" ","-").lower()
+    vs_currency = str(vs_currency).replace(" ","").lower()
+    data = cg.get_price(ids=id,vs_currencies=vs_currency,include_market_cap=mkt_cap)
+    id = id.split(",")
+    vs_currency = vs_currency.split(",")
+    embed = discord.Embed(title="Here are the price(s) you asked!",color=discord.Color.gold(),timestamp=datetime.now())
 
     for i in id:
-        tempString = ""
+        tempLs = []
         for j in vs_currency:
-            tempString += f"""```yml
-Price in {j.upper()}: {round(data[i][j],2)}\n"""
+            tempLs.append([
+                f"{j.upper()} | Price", round(data[i][j],2)
+            ])
             if mkt_cap:
-                tempString += f"""Total Market Cap: {round(data[i][f"{j}_market_cap"],2)}"""
-
-            tempString += "```" 
-        embed.add_field(name=i.capitalize().replace("-"," "),value=tempString,inline=False)
-    
+                tempLs.append([
+                    f"{j.upper()} | Market Cap.", round(data[i][f"{j}_market_cap"],2)
+                ])
+        embed.add_field(
+            name=f"**{i.capitalize().replace('-',' ')}**",
+            value=f"""```ml\n{tb(tempLs,tablefmt="fancy_grid",numalign="center",floatfmt=(".3f"))}```""",
+            inline=False)
+    embed.set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
     return embed

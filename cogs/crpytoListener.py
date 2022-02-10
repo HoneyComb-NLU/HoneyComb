@@ -21,9 +21,9 @@ class cryproListener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self,message):
-        delay_check_fail = message.channel.slowmode_delay < 30
-        if message.author.bot or message.channel.id not in dbu.get_nlu_channels():
+        if message.author.bot or message.channel.id or message.channel.type == discord.TextChannel not in dbu.get_nlu_channels():
             return
+        delay_check_fail = message.channel.slowmode_delay < 30
         if delay_check_fail:
             em = discord.Embed(title="Slowmode not detected!",description="""In order to use Natural language mode you will need to have a minimum of 30 seconds slow mode...\n\n*Silently enables slowmode... hehehehe...*""",color=discord.Color.red())
             await message.channel.send(embed=em)
@@ -56,7 +56,8 @@ class cryproListener(commands.Cog):
             await ctx.respond(embed=embed)
 
         else:
-            log.error(error)
+            log.error(str(error))
+            # raise error
 
 def setup(bot):
     bot.add_cog(cryproListener(bot))
