@@ -26,3 +26,42 @@ def remove_guild(guild_id):
 
     dbCon.commit()
     dbCon.close()
+
+
+def coin_id_check(check_string:str):
+    dbCon = sqlite3.connect(osu.get_db())
+    cur = dbCon.cursor()
+    
+    data = cur.execute(f"""SELECT * FROM coin_list 
+    WHERE id = "{check_string}" COLLATE NOCASE""").fetchall()
+
+    dbCon.commit()
+    dbCon.close()
+    return data
+
+
+def supported_currency_check(check_string:str):
+    dbCon = sqlite3.connect(osu.get_db())
+    cur = dbCon.cursor()
+    
+    data = cur.execute(f"""SELECT * FROM supported_currencies
+    WHERE id = "{check_string}" COLLATE NOCASE""").fetchall()
+
+    dbCon.commit()
+    dbCon.close()
+    return data
+
+
+
+def search_thru_db_for(query_string:str):
+    dbCon = sqlite3.connect(osu.get_db())
+    cur = dbCon.cursor()
+    
+    data = cur.execute(f"""SELECT * FROM coin_list 
+    WHERE id = "{query_string}" COLLATE NOCASE
+    OR symbol = "{query_string}" COLLATE NOCASE
+    OR name = "{query_string}" COLLATE NOCASE """).fetchall()
+
+    dbCon.commit()
+    dbCon.close()
+    return data

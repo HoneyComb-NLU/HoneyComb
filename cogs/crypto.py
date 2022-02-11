@@ -1,11 +1,12 @@
-from pydoc import describe
-from random import choices
+from datetime import datetime
 import utils.CryptoUtils as cu
 import utils.databaseUtils as dbu
 import discord
 import cogs.crpytoListener as cc
 from discord.commands import slash_command,Option
 from discord.ext import commands
+from tabulate import tabulate as tb
+
 # Chart_url = "https://quickcharts.io/charts?c="
 
 class Crypto(commands.Cog):
@@ -22,9 +23,19 @@ class Crypto(commands.Cog):
         newChannelEmbed = discord.Embed(title="Natural Language Mode",description=f"HoneyComb is now listening for Natural language in this channel!",color=discord.Color.brand_green())
         await channel.send(embed=newChannelEmbed)    
 
-    @slash_command(description="Da Tester!")
-    async def da_baby(self,ctx):
-        pass
+    @slash_command(description="Helps you find Id, Symbol or Name of the Cryptocurrency.")
+    @commands.cooldown(1,10,commands.BucketType.user)
+    async def search(self,ctx,query: Option(str, description="Enter your Query string here, E.g. Matic, btc, ETH, etc",required=True)):
+        data = dbu.search_thru_db_for(query)
+        head = ["Id", "Symbol", "Name"]
+        em = discord.Embed(
+            title="Search results for " + f"`{query}`",
+            description="```\n" + tb(data,headers=head,numalign="center",stralign="left",tablefmt="fancy_grid") + "```",
+            timestamp=datetime.now(),
+            color=discord.Color.gold()
+        )
+        await ctx.respond(embed=em)
+
     
 
     # ----------- Main Commands ------------- #

@@ -120,23 +120,33 @@ def get_supported_currencies():
     return emb
 
 def get_price(id:str,vs_currency:str,mkt_cap=False):
-    # TODO:- Add Database checking to avoid waste of queries
+    id = id.replace(", ",",").replace(" ","-").lower()
+    vs_currency = str(vs_currency).replace(" ","").lower()
+    id_list = id.split(",")
+    vs_currency_list = vs_currency.split(",")
+    # ---- Database Validation ---- #
+    for e in id_list:
+        if len(dbu.coin_id_check(e)) == 0:
+            raise KeyError("Coin Id Mismatch : " + e)
+        
+    for e in vs_currency_list:
+        if len(dbu.supported_currency_check(e)) == 0:
+            raise KeyError("Vs Currency Mismatch : " + e)
+
+    print("fudge from Crypto Utils")
+    
     # ----- Limit ------- #
     if id.count(',') > 10 or vs_currency.count(",") > 5:
         err = discord.Embed(title="Woaahh! Why are you so Data-Hungry...",description="You can only request up to **10** ids & **5** Exchange currencies at a time.",
         color=discord.Color.red(),timestamp=datetime.now())
         return err
 
-    id = id.replace(", ",",").replace(" ","-").lower()
-    vs_currency = str(vs_currency).replace(" ","").lower()
     data = cg.get_price(ids=id,vs_currencies=vs_currency,include_market_cap=mkt_cap)
-    id = id.split(",")
-    vs_currency = vs_currency.split(",")
+    
     embed = discord.Embed(title="Here are the price(s) you asked!",color=discord.Color.gold(),timestamp=datetime.now())
-
-    for i in id:
+    for i in id_list:
         tempLs = []
-        for j in vs_currency:
+        for j in vs_currency_list:
             tempLs.append([
                 f"{j.upper()} | Price", round(data[i][j],2)
             ])
