@@ -21,7 +21,7 @@ class cryproListener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self,message):
-        if message.author.bot or message.channel.type == discord.ChannelType.private or message.channel.id not in dbu.get_nlu_channels():
+        if message.author.bot or message.channel.type == discord.ChannelType.private or not dbu.check_nlu_channels(message.channel.id):
             return
 
         delay_check_fail = message.channel.slowmode_delay < 30

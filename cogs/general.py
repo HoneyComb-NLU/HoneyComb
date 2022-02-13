@@ -13,7 +13,10 @@ class General(commands.Cog):
     
     @slash_command(description="Check bot's Latency.")
     async def ping(self,ctx):
-        pingembed = discord.Embed(title=f"""{str(int(self.bot.latency * 1000)) + " ms"}""")
+        pingembed = discord.Embed(
+            title=f"""{str(int(self.bot.latency * 1000)) + " ms"}""",
+            color=discord.Color.embed_background()
+        )
         await ctx.respond(embed=pingembed)
 
 def setup(bot):

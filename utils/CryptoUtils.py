@@ -2,7 +2,6 @@ from datetime import datetime
 from pycoingecko import CoinGeckoAPI
 import sqlite3
 import discord
-from pyparsing import col 
 import utils.consoleLogger as log
 import utils.osUtils as osu
 import utils.databaseUtils as dbu
@@ -22,7 +21,8 @@ def load_cache_channel():
     cur = dbCon.cursor()
     cur.execute("""CREATE TABLE IF NOT EXISTS guilds (
         guild_id BIGINT PRIMARY KEY,
-        nlu_channel_id BIGINT
+        nlu_channel_id BIGINT,
+        default_vs_currency TEXT DEFAULT 'INR'
     )""")
     cached_nlu_channels = [each[0] for each in cur.execute("""SELECT nlu_channel_id FROM guilds""").fetchall()]
     
@@ -30,17 +30,26 @@ def load_cache_channel():
     dbCon.close()
     return cached_nlu_channels
 
-def add_nlu_channel(guild_id:int,nlu_channel_id:int):
+def add_nlu_channel(guild_id:int,nlu_channel_id:int,default_vs_currency:str):
     dbCon = sqlite3.connect(db_url)
     cur = dbCon.cursor()
+
+    default_vs_currency = str(default_vs_currency).replace(" ","").lower()
+    vs_currency_list = default_vs_currency.split(",")
+
+    for e in vs_currency_list:
+        if len(dbu.supported_currency_check(e)) == 0:
+            return False
+
     try:
-        cur.execute(f"""INSERT INTO guilds values ({guild_id},{nlu_channel_id})""")
+        cur.execute(f"""INSERT INTO guilds values ({guild_id},{nlu_channel_id},"{default_vs_currency}")""")
     except sqlite3.IntegrityError:
         cur.execute(f"""DELETE FROM guilds WHERE guild_id={guild_id}""")
-        cur.execute(f"""INSERT INTO guilds values ({guild_id},{nlu_channel_id})""")
+        cur.execute(f"""INSERT INTO guilds values ({guild_id},{nlu_channel_id},"{default_vs_currency}")""")
         # print("lol")
     dbCon.commit()
     dbCon.close()
+    return True
 
 
 # -------- On_StartUp -------- #
@@ -119,11 +128,15 @@ def get_supported_currencies():
     )
     return emb
 
-def get_price(id:str,vs_currency:str,mkt_cap=False):
+def get_price(id:str,guild_id,vs_currency:str=None,mkt_cap=False):
+    if vs_currency == None:
+        vs_currency = dbu.get_default_currency(guild_id)
+
     id = id.replace(", ",",").replace(" ","-").lower()
     vs_currency = str(vs_currency).replace(" ","").lower()
     id_list = id.split(",")
     vs_currency_list = vs_currency.split(",")
+
     # ---- Database Validation ---- #
     for e in id_list:
         if len(dbu.coin_id_check(e)) == 0:
@@ -133,11 +146,9 @@ def get_price(id:str,vs_currency:str,mkt_cap=False):
         if len(dbu.supported_currency_check(e)) == 0:
             raise KeyError("Vs Currency Mismatch : " + e)
 
-    print("fudge from Crypto Utils")
-    
     # ----- Limit ------- #
-    if id.count(',') > 10 or vs_currency.count(",") > 5:
-        err = discord.Embed(title="Woaahh! Why are you so Data-Hungry...",description="You can only request up to **10** ids & **5** Exchange currencies at a time.",
+    if id.count(',') >= 5 or vs_currency.count(",") >= 5:
+        err = discord.Embed(title="Woaahh! Why are you so Data-Hungry...",description="You can only request up to **5** ids & **5** Exchange currencies at a time.",
         color=discord.Color.red(),timestamp=datetime.now())
         return err
 
@@ -148,15 +159,37 @@ def get_price(id:str,vs_currency:str,mkt_cap=False):
         tempLs = []
         for j in vs_currency_list:
             tempLs.append([
-                f"{j.upper()} | Price", round(data[i][j],2)
+                f"{j.upper()} | Price", data[i][j]
             ])
+
             if mkt_cap:
                 tempLs.append([
-                    f"{j.upper()} | Market Cap.", round(data[i][f"{j}_market_cap"],2)
+                    f"{j.upper()} | Market Cap.", data[i][f"{j}_market_cap"]
                 ])
         embed.add_field(
             name=f"**{i.capitalize().replace('-',' ')}**",
-            value=f"""```ml\n{tb(tempLs,tablefmt="fancy_grid",numalign="center",floatfmt=(".3f"))}```""",
+            value=f"""```ml\n{tb(tempLs,tablefmt="fancy_grid",numalign="center")}```""",
             inline=False)
     embed.set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
     return embed
+
+def searching(query):
+    data = dbu.search_thru_db_for(query)
+
+    if len(data) > 0:
+        head = ["Id", "Symbol", "Name"]
+        em = discord.Embed(
+            title="Search results for " + f"`{query}`",
+            description="```\n" + tb(data,headers=head,numalign="center",stralign="left",tablefmt="fancy_grid") + "```",
+            timestamp=datetime.now(),
+            color=discord.Color.gold()
+        )
+    else:
+        em = discord.Embed(
+            title=f"No result found for `{query}` :(",
+            timestamp=datetime.now(),
+            color=discord.Color.red()
+        )
+
+    return em
+
