@@ -15,7 +15,7 @@ class Owner_Commands(commands.Cog,name="Owner Commands"):
     @slash_command(default_permission=False)
     @permissions.is_owner()
     async def exit(self,ctx):
-        await ctx.respond("Exiting!")
+        await ctx.respond("Exiting!",ephemeral=True)
         log.alert(f"Exit Command executed by: {ctx.author.name}#{ctx.author.discriminator}")
         await self.bot.close()
     

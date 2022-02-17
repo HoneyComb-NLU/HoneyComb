@@ -20,6 +20,36 @@ class cryproListener(commands.Cog):
         cu.write_supported_currencies()
 
     @commands.Cog.listener()
+    async def on_application_command_error(self,ctx,error):
+        if isinstance(error, commands.CommandOnCooldown):            
+            embed = discord.Embed(
+                title="Command Cooldown!",
+                description=str(error),
+                color=discord.Color.red()
+            )
+            await ctx.respond(embed=embed,ephemeral=True)
+
+        elif isinstance(error,HTTPError) and str(error)[:3] == "429":
+            embed = discord.Embed(
+                title="**Wow! Nice Burnout!**",
+                description=f"Data request limit exceeded! Please ask <@474589812192575488> to pay for the services. ",
+                color=discord.Color.red()
+            )
+            await ctx.respond(embed=embed,ephemeral=True)
+
+        elif isinstance(error, commands.MissingPermissions):
+            embed = discord.Embed(
+                title="**Missing permission**",
+                description=f"You cannot use this command due to lack of permissions.",
+                color=discord.Color.red()
+            )
+            await ctx.respond(embed=embed,ephemeral=True)
+        else:
+            await self.bot.get_channel(942843515656867840).send("** "+ ctx.guild.name + " →** `" + str(error) + "`")
+            log.error(str(error))
+            raise error
+
+    @commands.Cog.listener()
     async def on_message(self,message):
         if message.author.bot or message.channel.type == discord.ChannelType.private or not dbu.check_nlu_channels(message.channel.id):
             return
@@ -40,26 +70,9 @@ class cryproListener(commands.Cog):
         await message.channel.send(dbu.coin_id_check(message.content))
         # Smooth Love Potion -> smooth-love-potion
 
-    @commands.Cog.listener()
-    async def on_application_command_error(self,ctx,error):
-        if isinstance(error,commands.CommandOnCooldown):            
-            embed = discord.Embed(
-                title="Command Cooldown!",
-                description=error,
-                color=discord.Color.red()
-            )
-            await ctx.respond(embed=embed,delete_after=5)
-        elif isinstance(error,HTTPError) and str(error)[:3] == "429":
-            embed = discord.Embed(
-                title="**Wow! Nice Burnout!**",
-                description=f"Data request limit exceeded! Please ask the <@474589812192575488> to pay for the services. ",
-                color=discord.Color.red()
-            )
-            await ctx.respond(embed=embed)
 
-        else:
-            log.error(str(error))
-            # raise error
 
+
+        
 def setup(bot):
     bot.add_cog(cryproListener(bot))
