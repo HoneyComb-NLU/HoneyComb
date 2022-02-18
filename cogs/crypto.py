@@ -1,5 +1,7 @@
 from datetime import datetime
 from email.policy import default
+from faulthandler import disable
+from xml.etree.ElementInclude import include
 import utils.CryptoUtils as cu
 import utils.databaseUtils as dbu
 import discord
@@ -7,8 +9,11 @@ import cogs.crpytoListener as cc
 from discord.commands import slash_command,Option,permissions
 from discord.ext import commands,pages
 from tabulate import tabulate as tb
+import asyncio
 
 # Chart_url = "https://quickcharts.io/charts?c="
+
+general_cooldown = 45
 
 class Crypto(commands.Cog):
     def __init__(self,bot):
@@ -35,7 +40,7 @@ class Crypto(commands.Cog):
 
         await nlu_channel.edit(slowmode_delay=30,topic="<@920869009057017907>'s natural language queries channel.")
         embed = discord.Embed(title="Natural Language Mode",description=f"""HoneyComb is now listening for Natural language in <#{nlu_channel.id}>""",color=discord.Color.brand_green())
-        await ctx.respond(embed=embed,delete_after=30)
+        await ctx.respond(embed=embed,ephemeral=True)
         newChannelEmbed = discord.Embed(title="Natural Language Mode",description=f"HoneyComb is now listening for Natural language in this channel!\n**New Default Currency(ies) : ** {default_exhange_currency}",color=discord.Color.brand_green())
         await nlu_channel.send(embed=newChannelEmbed)
          
@@ -60,17 +65,17 @@ class Crypto(commands.Cog):
         await ctx.respond(embed=cu.searching(query))
 
     @slash_command(description="Get public companies bitcoin or ethereum holdings.")
-    @commands.cooldown(1,30,commands.BucketType.user)
+    @commands.cooldown(1,general_cooldown,commands.BucketType.user)
     async def global_holdings(self, ctx, coin_id: Option(str,description="Coin Id",choices=["Bitcoin","Ethereum"],required=True)):
         await ctx.respond(embed=cu.get_top_company_holdings(coin_id.lower()))
 
     @slash_command(description="Get a list of all the supported Exchange currencies.")
-    @commands.cooldown(1,30,commands.BucketType.user)
+    @commands.cooldown(1,general_cooldown,commands.BucketType.user)
     async def supported_currencies(self,ctx):
         await ctx.respond(embed=cu.get_supported_currencies())
 
     @slash_command(description="Get the current price of any listed crytpocurrencies in any supported currencies.")
-    @commands.cooldown(1,30,commands.BucketType.user)
+    @commands.cooldown(1,general_cooldown,commands.BucketType.user)
     async def price(self,ctx,id: Option(str,description="Id of coins, comma-separated if querying more than 1 coin",required=True),
     currency: Option(str,description="Conversion currency, comma-separated if querying more than 1 currency. [/supported_currencies]",required=False),
     market_cap: Option(bool,description="Whether you want Market capitalization info of the coin(s)",required=False)):
@@ -88,12 +93,23 @@ class Crypto(commands.Cog):
 
 
     @slash_command(description="Get curcial data of the given coin.")
-    @commands.cooldown(1,30,commands.BucketType.user)
+    @commands.cooldown(1,general_cooldown,commands.BucketType.user)
     async def coin_data(self,ctx: discord.ApplicationContext, id: Option(str,description="Id of coin",required=True),
     currency: Option(str,description="Conversion currency, comma-separated if querying more than 1 currency. [/supported_currencies]",required=False)):
         
-        resPaginator = pages.Paginator(pages=list(cu.page_coin_details(guild_id=ctx.guild.id,id=id,vs_currency=currency)),timeout=60)
+        resPaginator = pages.Paginator(
+            pages=list(cu.page_coin_details(guild_id=ctx.guild.id,id=id,vs_currency=currency)),
+            timeout=60,
+            show_disabled=True,
+            show_indicator=True,
+            use_default_buttons=False,
+            custom_buttons=cu.get_Paginator_buttons()
+        )
         await resPaginator.respond(ctx.interaction, ephemeral=False)
-        
+
+        # await resPaginator.wait()
+        # del resPaginator
+        # print("ended")
+
 def setup(bot):
     bot.add_cog(Crypto(bot))

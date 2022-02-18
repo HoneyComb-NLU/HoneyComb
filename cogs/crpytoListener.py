@@ -37,6 +37,13 @@ class cryproListener(commands.Cog):
             )
             await ctx.respond(embed=embed,ephemeral=True)
 
+        elif isinstance(error,discord.ApplicationCommandInvokeError) and "AssertionError" in str(error):
+            await ctx.respond(embed=discord.Embed(
+                title="Token Name Error",
+                description="Please input **__Valid__** crypto/exchange id.",
+                color=discord.Color.red()
+            ),ephemeral=True)
+
         elif isinstance(error, commands.MissingPermissions):
             embed = discord.Embed(
                 title="**Missing permission**",

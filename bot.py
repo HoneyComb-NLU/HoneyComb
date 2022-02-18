@@ -71,7 +71,7 @@ async def on_guild_remove(guild):
 
 
 loadAllCogs()
-
+# discord.http.API_VERSION = 10
 bot.run(config("BOT_TOKEN"))
 
 

@@ -16,14 +16,34 @@ db_url = osu.get_db()
 cg = CoinGeckoAPI()
 
 # ----------- Aux ------------- #
-def multiple_currency_extractor(List:list,data):
+def multiple_currency_extractor(List:list,data,signed:bool=False):
     """Extract the given currencies. Returns list of tuples of key values"""
     lol = []
     for e in List:
-        lol.append((e.upper(),data[e]))
-    # print(lol)
+        lol.append([e.upper(),str(round(data[e],8))])
+    if signed:
+        for e in lol:
+            e[1] += "↑" if float(e[1]) > 0 else "↓"
     return lol
 
+def get_Paginator_buttons():
+    return [
+        pages.PaginatorButton(
+            button_type="first",emoji=discord.PartialEmoji.from_str("HCrewind:943916100435992668"),style=discord.ButtonStyle.gray
+        ),
+        pages.PaginatorButton(
+            button_type="prev",emoji=discord.PartialEmoji.from_str("HCprevious:943916099496460328"),style=discord.ButtonStyle.gray
+        ),
+        pages.PaginatorButton(
+            "page_indicator", style=discord.ButtonStyle.gray, disabled=True
+        ),
+        pages.PaginatorButton(
+            button_type="next",emoji=discord.PartialEmoji.from_str("HCnext:943916099341254686"),style=discord.ButtonStyle.gray
+        ),
+        pages.PaginatorButton(
+            button_type="last",emoji=discord.PartialEmoji.from_str("HCfastfwd:943916100880564304"),style=discord.ButtonStyle.gray
+        )
+    ]
 
 #-------- NLU/NLP Channel list --------#
 def load_cache_channel():
@@ -231,7 +251,7 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
     data_pages = [
         discord.Embed(
             title="**__" + data["name"] + "__ ┋ __" + str(data["symbol"]).upper() + "__**",
-            description=re.sub("<a.*?>","",str(data["description"]["en"][:1024])).replace("</a>","") + "...",
+            description=re.sub("<a.*?>","",str(data["description"]["en"][:1024])).replace("</a>","").replace("\n\n\n","\n\n") + "...",
             url=f"https://www.coingecko.com/en/coins/{id}",
             color=discord.Color.gold(),
             timestamp=datetime.now() 
@@ -250,11 +270,6 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
         .set_thumbnail(url=data['image']['large'])
         .set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
         .add_field(
-            name="**Market Cap __Rank__ :**",
-            value= "**:small_orange_diamond: " + str(data['market_cap_rank']) + "**",
-            inline=False
-        )
-        .add_field(
             name="**Current __Price__ :**",
             value="```ml\n" + tb(
                 multiple_currency_extractor(vs_currency_list,data['market_data']['current_price']),
@@ -264,19 +279,24 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
             inline=True
         )
         .add_field(
-            name="**Total __Volume__ :**",
+            name="**__Price__ Change in 24Hrs :**",
             value="```ml\n" + tb(
-                multiple_currency_extractor(vs_currency_list,data['market_data']['total_volume']),
+                multiple_currency_extractor(vs_currency_list,data['market_data']['price_change_24h_in_currency'],True),
                 tablefmt='fancy_grid',
                 numalign="left"
             ) + "```",
             inline=True
         )
         .add_field(
-            name="**Total __Supply__ :**",
-            value= "**:small_orange_diamond: " + str(data['market_data']['total_supply']) + "**",
+            name="**__Price__ change % [1D] :**",
+            value= "**:small_orange_diamond: " + str(round(data['market_data']['price_change_percentage_24h'],2)) + "% **",
             inline=False
         )
+        # .add_field(
+        #     name="**__Price__ change % [1M] :**",
+        #     value= "**:small_orange_diamond: " + str(round(data['market_data']['price_change_percentage_30d'],2)) + "% **",
+        #     inline=True
+        # )
         .add_field(
             name="**All Time __High__ :**",
             value="```ml\n" + tb(
@@ -296,18 +316,53 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
             inline=True
         )
         
+        # .add_field(
+        #     name="**__Price__ change % [1Y] :**",
+        #     value= "**:small_orange_diamond: " + str(round(data['market_data']['price_change_percentage_1y'],4)) + "**",
+        #     inline=True
+        # )
         
     )
     # ---- 3
     data_pages.append(
         discord.Embed(
-            title="**__" + data["name"] + "__ ┋ __" + str(data["symbol"]).upper() + "__** 1111",
+            title="**__" + data["name"] + "__ ┋ __" + str(data["symbol"]).upper() + "__**",
             url=f"https://www.coingecko.com/en/coins/{id}",
             color=discord.Color.gold(),
             timestamp=datetime.now() 
         )
         .set_thumbnail(url=data['image']['large'])
         .set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
+
+        .add_field(
+            name="**Market Cap __Rank__ :**",
+            value= "**:small_orange_diamond: " + str(data['market_cap_rank']) + "**",
+            inline=True
+        )
+        .add_field(
+            name="**Market Cap __Rank__ :**",
+            value= "**:small_orange_diamond: " + str(data['market_data']['market_cap_change_percentage_24h']) + "**",
+            inline=True
+        )
+        .add_field(
+            name="**Total __Volume__ :**",
+            value="```ml\n" + tb(
+                multiple_currency_extractor(vs_currency_list,data['market_data']['total_volume']),
+                tablefmt='fancy_grid',
+                numalign="left"
+            ) + "```",
+            inline=False
+        )
+        .add_field(
+            name="**Total __Supply__ :**",
+            value= "**:small_orange_diamond: " + str(data['market_data']['total_supply']) + "**",
+            inline=False
+        )
+        .add_field(
+            name="**Circulating __Supply__ :**",
+            value= "**:small_orange_diamond: " + str(data['market_data']['circulating_supply']) + "**",
+            inline=True
+        )
     )
 
     # print(data_pages)
