@@ -27,7 +27,7 @@ class Crypto(commands.Cog):
     default_exhange_currency: Option(str,description='Eg. INR, USD, etc | Defaults to "INR" [/supported_currencies]',required=False,default="INR")):        
         if default_exhange_currency.count(",") >= 5:
             erremb = discord.Embed(title="Default Exchange currencies limit exceeded!",
-            description="You can only have upto 5 default exchange currecies.",color=discord.Color.red())
+            description="You can only have upto 5 default exchange currencies.",color=discord.Color.red())
             await ctx.respond(embed=erremb)
             return
 
@@ -41,11 +41,26 @@ class Crypto(commands.Cog):
         await nlu_channel.edit(slowmode_delay=30,topic="<@920869009057017907>'s natural language queries channel.")
         embed = discord.Embed(title="Natural Language Mode",description=f"""HoneyComb is now listening for Natural language in <#{nlu_channel.id}>""",color=discord.Color.brand_green())
         await ctx.respond(embed=embed,ephemeral=True)
-        newChannelEmbed = discord.Embed(title="Natural Language Mode",description=f"HoneyComb is now listening for Natural language in this channel!\n**New Default Currency(ies) : ** {default_exhange_currency}",color=discord.Color.brand_green())
+        newChannelEmbed = discord.Embed(title="Natural Language Mode",description=f"HoneyComb is now listening for Natural language in this channel!\n**New Default Currency(s) : ** {default_exhange_currency}",color=discord.Color.brand_green())
         await nlu_channel.send(embed=newChannelEmbed)
          
-
-    #TODO: add removechannel command
+    @slash_command(description="Change default exchnage currencies.")
+    async def set_default_currencies(self,ctx,
+    currencies: Option(str,description='Eg. INR, USD, etc | Defaults to "INR" [/supported_currencies]',required=True,default="INR")):
+        succ = dbu.set_def_currencies(ctx.guild.id, currencies)
+        
+        if not succ:
+            await ctx.respond(embed=discord.Embed(title="There was some Error!",description="There was some error in your given data please double check the values.\n`⁕` Please refer to `/supported_currencies` to see out supported currencies.",
+            color=discord.Color.red()))
+            return
+        
+        embed = discord.Embed(
+            title=f"""Default Currencies Changed!""",
+            description=f"New Default Currencies are now set to: `{currencies.upper()}`",
+            color=discord.Color.green()
+        )
+        await ctx.respond(embed=embed)
+    
     
     @slash_command(description="Helps you find Id, Symbol or Name of the Cryptocurrency.")
     @commands.cooldown(1,10,commands.BucketType.user)
@@ -89,8 +104,6 @@ class Crypto(commands.Cog):
                 description="Please input **__Valid__** crypto/exchange id.",
                 color=discord.Color.red()
             ),ephemeral=True)
-
-
 
     @slash_command(description="Get curcial data of the given coin.")
     @commands.cooldown(1,general_cooldown,commands.BucketType.user)

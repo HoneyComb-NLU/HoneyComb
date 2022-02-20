@@ -1,3 +1,4 @@
+from locale import currency
 import discord
 import utils.osUtils as osu
 from discord.commands import slash_command,message_command,user_command
@@ -18,15 +19,6 @@ class General(commands.Cog):
             color=discord.Color.embed_background()
         )
         await ctx.respond(embed=pingembed)
-
-    @slash_command(name="target")
-    async def pagetest_target(self, ctx: discord.ApplicationContext):
-        """Demonstrates sending the paginator to a different target than where it was invoked."""
-        paginator = pages.Paginator(pages=["11111", "22222", "33333"])
-        await paginator.respond(ctx.interaction, target=ctx.interaction.user)
-    
-
-
 
 
 

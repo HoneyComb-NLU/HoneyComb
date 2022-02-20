@@ -1,6 +1,27 @@
 import sqlite3
 import utils.osUtils as osu
 
+def set_def_currencies(guild_id:int, def_currency:str):
+    dbCon = sqlite3.connect(osu.get_db())
+    cur = dbCon.cursor()
+
+    def_currency = str(def_currency).replace(" ","").lower()
+    if len(cur.execute(f"""SELECT * FROM guilds WHERE guild_id = {guild_id}""").fetchall()) == 0:
+        return False
+    
+    for e in def_currency.split(","):
+        if len(supported_currency_check(e)) == 0:
+            return False
+
+    cur.execute(f"""UPDATE guilds
+    SET default_vs_currency = "{def_currency}"
+    WHERE guild_id = {guild_id}
+    """)
+
+    dbCon.commit()
+    dbCon.close()
+    return True
+
 def get_nlu_channels():
     dbCon = sqlite3.connect(osu.get_db())
     cur = dbCon.cursor()

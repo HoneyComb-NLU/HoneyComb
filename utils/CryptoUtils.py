@@ -246,7 +246,7 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
     except AssertionError as er: 
         raise discord.ApplicationCommandInvokeError(e=er)
     # ------- Main Stuff ------#
-    data = cg.get_coin_by_id(id=id,localization="false",tickers=False,market_data=True,community_data=True,developer_data=False,sparkline=False)
+    data = cg.get_coin_by_id(id=id,localization="false",tickers=False,market_data=True,community_data=False,developer_data=False,sparkline=False)
     # ---- 1
     data_pages = [
         discord.Embed(
@@ -254,8 +254,9 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
             description=re.sub("<a.*?>","",str(data["description"]["en"][:1024])).replace("</a>","").replace("\n\n\n","\n\n") + "...",
             url=f"https://www.coingecko.com/en/coins/{id}",
             color=discord.Color.gold(),
-            timestamp=datetime.now() 
+            timestamp=datetime.now()
         )
+        .set_author(name="Description")
         .set_thumbnail(url=data['image']['large'])
         .set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
     ]
@@ -267,6 +268,7 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
             color=discord.Color.gold(),
             timestamp=datetime.now() 
         )
+        .set_author(name="Price")
         .set_thumbnail(url=data['image']['large'])
         .set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
         .add_field(
@@ -289,7 +291,7 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
         )
         .add_field(
             name="**__Price__ change % [1D] :**",
-            value= "**:small_orange_diamond: " + str(round(data['market_data']['price_change_percentage_24h'],2)) + "% **",
+            value= ":small_orange_diamond: " + str(round(data['market_data']['price_change_percentage_24h'],2)),
             inline=False
         )
         # .add_field(
@@ -331,18 +333,28 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
             color=discord.Color.gold(),
             timestamp=datetime.now() 
         )
+        .set_author(name="Market Capitalization & Supply")
         .set_thumbnail(url=data['image']['large'])
         .set_footer(text="Powered by CoinGecko",icon_url="https://imgur.com/67aeDXf.png")
-
         .add_field(
-            name="**Market Cap __Rank__ :**",
-            value= "**:small_orange_diamond: " + str(data['market_cap_rank']) + "**",
-            inline=True
+            name="**__Market Cap__ Rank :**",
+            value= ":small_orange_diamond: " + str(data['market_cap_rank']),
+            inline=False
         )
         .add_field(
-            name="**Market Cap __Rank__ :**",
-            value= "**:small_orange_diamond: " + str(data['market_data']['market_cap_change_percentage_24h']) + "**",
-            inline=True
+            name="**__Market Cap__ Change % [1D] :**",
+            value= ":small_orange_diamond: " + str(data['market_data']['market_cap_change_percentage_24h']),
+            inline=False
+        )
+        .add_field(
+            name="**Total __Supply__ :**",
+            value= ":small_orange_diamond: " + str(data['market_data']['total_supply']),
+            inline=False
+        )
+        .add_field(
+            name="**Circulating __Supply__ :**",
+            value= ":small_orange_diamond: " + str(data['market_data']['circulating_supply']),
+            inline=False
         )
         .add_field(
             name="**Total __Volume__ :**",
@@ -352,16 +364,6 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
                 numalign="left"
             ) + "```",
             inline=False
-        )
-        .add_field(
-            name="**Total __Supply__ :**",
-            value= "**:small_orange_diamond: " + str(data['market_data']['total_supply']) + "**",
-            inline=False
-        )
-        .add_field(
-            name="**Circulating __Supply__ :**",
-            value= "**:small_orange_diamond: " + str(data['market_data']['circulating_supply']) + "**",
-            inline=True
         )
     )
 

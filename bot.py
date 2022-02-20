@@ -30,7 +30,7 @@ def loadAllCogs():
 @bot.event
 async def on_ready():
     log.info(f"Logged on as : {bot.user.name}")
-    log.alert(f"Slash commands active on : {dgid}")
+    log.alert(f"Debug Guilds : {dgid}")
 
 @bot.event
 async def on_guild_join(guild):
@@ -44,7 +44,7 @@ I'm built to be your one stop solution for all your Crypto-currency related quer
 ~~---------------------------------------------------------------------------------------------~~
 **There are some things you should keep in mind while interacting with me.**
 `⁕` I work in 2 modes, `Slash Command mode` & `Natural language mode`.
-`⁕` Every command has a certain cooldown.
+`⁕` Use `/setup` to set `Natural Language` query channel & default Exchange currencies.
 `⁕` Natural language mode requires a special channel which should have atleast 30 seconds of [slow mode](https://support.discord.com/hc/en-us/articles/360016150952-Slowmode-Slllooowwwiiinng-down-your-channel).
 `⁕` In order to use natural language mode use `/setchannel <channel>`.
 `⁕` Natural language mode operates in **English only**. 
