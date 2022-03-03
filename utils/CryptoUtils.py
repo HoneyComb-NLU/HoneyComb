@@ -388,8 +388,8 @@ def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str,
     image_name = f"{user_id}_{datetime.now().timestamp()}"
     chrt.make_chart(coin_id,vs_curr,days,type[:1].lower(),image_name)
 
-    img = discord.File(f"./charts/{image_name}.png",filename=f"{coin_id}'s {type}.png")
-    embed.set_image(url=f"attachment://{coin_id}'s {type}.png")
+    img = discord.File(f"./charts/{image_name}.png",filename=f"chart.png")
+    embed.set_image(url=f"attachment://chart.png")
 
     return embed,img,image_name
 

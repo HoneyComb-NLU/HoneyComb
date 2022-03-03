@@ -125,9 +125,9 @@ class Crypto(commands.Cog):
     currency: Option(str,description="Conversion currency, If not specified it will default to first default currency",required=False,default=None)):
                
         embed,img,imgName = cu.make_normal_chart(id,currency,days,type,ctx.author.id,ctx.guild.id)
-        await ctx.send(file=img,embed=embed)
+        await ctx.respond(file=img,embed=embed)
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
         os.remove(f"./charts/{imgName}.png")
         # list index 
 

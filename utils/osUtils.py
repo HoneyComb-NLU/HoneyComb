@@ -24,3 +24,13 @@ def get_NLU_URL():
 
 def get(search_string:str):
     return str(config(search_string))
+
+
+
+
+# BOT_TOKEN
+# DEBUG_GUILDS
+# DICT_KEY
+# DB_URL
+# NLU_URL
+# DPI
