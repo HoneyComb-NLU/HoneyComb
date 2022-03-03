@@ -371,15 +371,27 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
     return data_pages
 
 def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str, guild_id:int):
+    coin_id = coin_id.replace(" ","-").lower()
+    
+    embed = discord.Embed(
+        title=f"{dbu.get_coin_name(coin_id).capitalize()}'s {type} for last `{days}` days",
+        color=discord.Color.gold(),
+        timestamp=datetime.now()
+    )
+    
+    # print(">" + coin_id)
     if vs_curr == None:
         vs_curr = dbu.get_default_currency(guild_id=guild_id)
         vs_curr = str(vs_curr).replace(" ","").lower().split(",")[0]
 
-    # print(vs_curr)    
 
     image_name = f"{user_id}_{datetime.now().timestamp()}"
-    chrt.make_chart(coin_id,vs_curr,days,type,image_name)
-    return image_name
+    chrt.make_chart(coin_id,vs_curr,days,type[:1].lower(),image_name)
+
+    img = discord.File(f"./charts/{image_name}.png",filename=f"{coin_id}'s {type}.png")
+    embed.set_image(url=f"attachment://{coin_id}'s {type}.png")
+
+    return embed,img,image_name
 
 
 

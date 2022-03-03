@@ -104,6 +104,7 @@ def get_default_currency(guild_id:int):
     return str(def_currency[0][0])
 
 def get_coin_name(coin_id:str):
+    # print(coin_id)
     dbCon = sqlite3.connect(osu.get_db())
     cur = dbCon.cursor()
     
@@ -112,6 +113,7 @@ def get_coin_name(coin_id:str):
 
     dbCon.commit()
     dbCon.close()
-    return data[0][0]
+    # print(data[0][0])
+    return str(data[0][0])
 
 

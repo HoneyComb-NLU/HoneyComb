@@ -1,18 +1,11 @@
 from datetime import datetime
-from email.policy import default
-from faulthandler import disable
-from locale import currency
-from pydoc import describe
-from random import choices
-from xml.etree.ElementInclude import include
 import utils.CryptoUtils as cu
 import utils.databaseUtils as dbu
 import discord
-import cogs.crpytoListener as cc
 from discord.commands import slash_command,Option,permissions
 from discord.ext import commands,pages
 from tabulate import tabulate as tb
-import asyncio
+import asyncio,os
 
 # Chart_url = "https://quickcharts.io/charts?c="
 
@@ -130,10 +123,28 @@ class Crypto(commands.Cog):
     days: Option(str,description="No. of days you want to look back [1,2,3,...,max]",required=True),
     type: Option(str,description="Type of data you want in chart.",required=True,choices=["Price","Market Cap.","Total Volume"]),
     currency: Option(str,description="Conversion currency, If not specified it will default to first default currency",required=False,default=None)):
-        
-        id = id.replace(" ","-").lower()
-        type = type[:1].lower() # p,m,t
-        cu.make_normal_chart(id,currency,days,type,ctx.author.id,ctx.guild.id)
+               
+        embed,img,imgName = cu.make_normal_chart(id,currency,days,type,ctx.author.id,ctx.guild.id)
+        await ctx.send(file=img,embed=embed)
+
+        await asyncio.sleep(1)
+        os.remove(f"./charts/{imgName}.png")
+        # list index 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def setup(bot):
     bot.add_cog(Crypto(bot))
