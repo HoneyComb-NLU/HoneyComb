@@ -3,9 +3,12 @@ import discord
 from discord.ext import commands
 from discord.commands import slash_command,message_command,user_command
 import utils.CryptoUtils as cu
+import utils.osUtils as osu
 import utils.databaseUtils as dbu
 from requests.exceptions import HTTPError
 import utils.consoleLogger as log
+
+nlu_url = osu.get_NLU_URL()
 
 class cryproListener(commands.Cog):
     def __init__(self,bot):

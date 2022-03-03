@@ -1,5 +1,6 @@
 import sqlite3
 import utils.osUtils as osu
+# import osUtils as osu
 
 def set_def_currencies(guild_id:int, def_currency:str):
     dbCon = sqlite3.connect(osu.get_db())
@@ -102,6 +103,15 @@ def get_default_currency(guild_id:int):
 
     return str(def_currency[0][0])
 
+def get_coin_name(coin_id:str):
+    dbCon = sqlite3.connect(osu.get_db())
+    cur = dbCon.cursor()
+    
+    data = cur.execute(f"""SELECT name FROM coin_list 
+    WHERE id = "{coin_id}" COLLATE NOCASE""").fetchall()
 
+    dbCon.commit()
+    dbCon.close()
+    return data[0][0]
 
 

@@ -14,8 +14,13 @@ def get_debug_guilds():
     return list(map(int,config("DEBUG_GUILDS")[1:-1].split(",")))
 
 def get_db():
-    return str(config("DB_URL"))
-    
+    return str(config("DB_URL"))    
 
 def get_dict_key():
     return config("DICT_KEY")
+
+def get_NLU_URL():
+    return str(config("NLU_URL"))
+
+def get(search_string:str):
+    return str(config(search_string))

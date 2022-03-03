@@ -1,13 +1,13 @@
 from datetime import datetime
 from pycoingecko import CoinGeckoAPI
-import sqlite3
+import sqlite3,json,re
 import discord
 from discord.ext import pages
 import utils.consoleLogger as log
 import utils.osUtils as osu
 import utils.databaseUtils as dbu
 from tabulate import tabulate as tb
-import json,re
+import utils.chartUtils as chrt
 
 db_url = osu.get_db()
 # db_url = ".\database\database.db"
@@ -370,6 +370,16 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
     # print(data_pages)
     return data_pages
 
+def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str, guild_id:int):
+    if vs_curr == None:
+        vs_curr = dbu.get_default_currency(guild_id=guild_id)
+        vs_curr = str(vs_curr).replace(" ","").lower().split(",")[0]
+
+    # print(vs_curr)    
+
+    image_name = f"{user_id}_{datetime.now().timestamp()}"
+    chrt.make_chart(coin_id,vs_curr,days,type,image_name)
+    return image_name
 
 
 

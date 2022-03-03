@@ -1,6 +1,9 @@
 from datetime import datetime
 from email.policy import default
 from faulthandler import disable
+from locale import currency
+from pydoc import describe
+from random import choices
 from xml.etree.ElementInclude import include
 import utils.CryptoUtils as cu
 import utils.databaseUtils as dbu
@@ -13,7 +16,7 @@ import asyncio
 
 # Chart_url = "https://quickcharts.io/charts?c="
 
-general_cooldown = 45
+general_cooldown = 1
 
 class Crypto(commands.Cog):
     def __init__(self,bot):
@@ -120,9 +123,17 @@ class Crypto(commands.Cog):
         )
         await resPaginator.respond(ctx.interaction, ephemeral=False)
 
-        # await resPaginator.wait()
-        # del resPaginator
-        # print("ended")
+    @slash_command(description="Get Chart of specified type.")
+    @commands.cooldown(1,general_cooldown,commands.BucketType.user)
+    async def chart(self,ctx:discord.ApplicationContext, 
+    id: Option(str,description="Id of Coin [Only one]",required=True),
+    days: Option(str,description="No. of days you want to look back [1,2,3,...,max]",required=True),
+    type: Option(str,description="Type of data you want in chart.",required=True,choices=["Price","Market Cap.","Total Volume"]),
+    currency: Option(str,description="Conversion currency, If not specified it will default to first default currency",required=False,default=None)):
+        
+        id = id.replace(" ","-").lower()
+        type = type[:1].lower() # p,m,t
+        cu.make_normal_chart(id,currency,days,type,ctx.author.id,ctx.guild.id)
 
 def setup(bot):
     bot.add_cog(Crypto(bot))
