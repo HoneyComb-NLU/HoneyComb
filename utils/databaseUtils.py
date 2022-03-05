@@ -114,6 +114,9 @@ def get_coin_name(coin_id:str):
     dbCon.commit()
     dbCon.close()
     # print(data[0][0])
-    return str(data[0][0])
+    if len(data) == 0:
+        raise(KeyError)
+        
+    return str(data[0][0]) 
 
 

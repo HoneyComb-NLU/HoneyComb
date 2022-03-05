@@ -91,15 +91,8 @@ class Crypto(commands.Cog):
     currency: Option(str,description="Conversion currency, comma-separated if querying more than 1 currency. [/supported_currencies]",required=False),
     market_cap: Option(bool,description="Whether you want Market capitalization info of the coin(s)",required=False)):
         await ctx.respond(embed=cu.get_price(ctx.guild.id,id,currency,market_cap))
+   
 
-    @price.error
-    async def err(self,ctx,error):
-        if isinstance(error,discord.ApplicationCommandInvokeError):
-            await ctx.respond(embed=discord.Embed(
-                title="Token Name Error",
-                description="Please input **__Valid__** crypto/exchange id.",
-                color=discord.Color.red()
-            ),ephemeral=True)
 
     @slash_command(description="Get curcial data of the given coin.")
     @commands.cooldown(1,general_cooldown,commands.BucketType.user)
@@ -129,7 +122,7 @@ class Crypto(commands.Cog):
 
         await asyncio.sleep(2)
         os.remove(f"./charts/{imgName}.png")
-        # list index 
+        # list index , Value Error
 
 
 

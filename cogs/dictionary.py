@@ -27,7 +27,7 @@ class dictionary(commands.Cog):
             if response_code == 404:
                 embed = discord.Embed(
                     title="**Honeycomb Dictionary**",
-                    description=f"**No Definition found for word : {word[0]}**",
+                    description=f"**No Definition found for word : `{word[0]}`**",
                     color=discord.Color.red(),
                     timestamp=datetime.now()
                 )
@@ -41,7 +41,7 @@ class dictionary(commands.Cog):
             elif response_code == 200:
                 embed = discord.Embed(
                     title="**Honeycomb Dictionary**",
-                    description="**" + word[0].capitalize() + "**",
+                    description=":small_orange_diamond:**" + word[0].capitalize() + "**",
                     color=discord.Color.green(),
                     timestamp=datetime.now()
                 )

@@ -39,14 +39,7 @@ class cryproListener(commands.Cog):
                 color=discord.Color.red()
             )
             await ctx.respond(embed=embed,ephemeral=True)
-
-        elif isinstance(error,discord.ApplicationCommandInvokeError) and "AssertionError" in str(error):
-            await ctx.respond(embed=discord.Embed(
-                title="Token Name Error",
-                description="Please input **__Valid__** crypto/exchange id.",
-                color=discord.Color.red()
-            ),ephemeral=True)
-
+        
         elif isinstance(error, commands.MissingPermissions):
             embed = discord.Embed(
                 title="**Missing permission**",
@@ -54,8 +47,16 @@ class cryproListener(commands.Cog):
                 color=discord.Color.red()
             )
             await ctx.respond(embed=embed,ephemeral=True)
+
+        elif isinstance(error.__context__,AssertionError) or isinstance(error.__context__,KeyError):
+            await ctx.respond(embed=discord.Embed(
+                title="Token Name Error",
+                description="Please input **__Valid__** crypto/exchange id.",
+                color=discord.Color.red()
+            ),ephemeral=True)
+
         else:
-            await self.bot.get_channel(942843515656867840).send("** "+ ctx.guild.name + " →** `" + str(error) + "`")
+            await self.bot.get_channel(int(osu.get("CONSOLE"))).send("** "+ ctx.guild.name + " →** `" + str(error) + "`")
             log.error(str(error))
             raise error
 

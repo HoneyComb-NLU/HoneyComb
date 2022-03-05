@@ -373,6 +373,8 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
 def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str, guild_id:int):
     coin_id = coin_id.replace(" ","-").lower()
     
+    assert len(dbu.coin_id_check(coin_id)) != 0
+
     embed = discord.Embed(
         title=f"{dbu.get_coin_name(coin_id).capitalize()}'s {type} for last `{days}` days",
         color=discord.Color.gold(),
