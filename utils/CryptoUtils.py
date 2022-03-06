@@ -420,5 +420,29 @@ def make_ohlc_chart(coin_id:str, vs_curr:str, days:str, user_id:str, guild_id:in
 
     return embed,img,image_name
 
+def make_ranged_chart(coin_id:str, vs_curr:str, from_timedelta:int, to_timedelta:int, type:str, user_id:str, guild_id:int):
+    coin_id = coin_id.replace(" ","-").lower()
+    
+    assert len(dbu.coin_id_check(coin_id)) != 0
+    
+    if vs_curr == None:
+        vs_curr = dbu.get_default_currency(guild_id=guild_id)
+        vs_curr = str(vs_curr).replace(" ","").lower().split(",")[0]
+
+
+    embed = discord.Embed(
+        title=f"{dbu.get_coin_name(coin_id).capitalize()}'s {type} from `{datetime.strftime(datetime.fromtimestamp(from_timedelta),'%d %b, %Y')}` to `{datetime.strftime(datetime.fromtimestamp(to_timedelta),'%d %b, %Y')}`",
+        color=discord.Color.gold(),
+        timestamp=datetime.now()
+    )
+
+    
+    image_name = f"{user_id}_{datetime.now().timestamp()}"
+    chrt.make_ranged_chart(coin_id,vs_curr,from_timedelta,to_timedelta,type[:1].lower(),image_name)
+
+    img = discord.File(f"./charts/{image_name}.png",filename=f"chart.png")
+    embed.set_image(url=f"attachment://chart.png")
+
+    return embed,img,image_name
 
 

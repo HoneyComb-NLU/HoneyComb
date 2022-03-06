@@ -123,7 +123,7 @@ class Crypto(commands.Cog):
         os.remove(f"./charts/{imgName}.png")
         # list index , Value Error
 
-    @slash_command(description="Get Chart of specified type.")
+    @slash_command(description="Get OHLC Chart of specified type.")
     @commands.cooldown(1,general_cooldown,commands.BucketType.user)
     async def ohlc_chart(self,ctx:discord.ApplicationContext, 
     id: Option(str,description="Id of Coin [Only one]",required=True),
@@ -137,6 +137,21 @@ class Crypto(commands.Cog):
         os.remove(f"./charts/{imgName}.png")
         # list index , Value Error
 
+    @slash_command(description="Get Chart of specified type.")
+    @commands.cooldown(1,general_cooldown,commands.BucketType.user)
+    async def ranged_chart(self,ctx:discord.ApplicationContext, 
+    id: Option(str,description="Id of Coin [Only one]",required=True),
+    from_dt: Option(str,name="from",description="Range starting date. For Eg. 19-04-2020 [DD-MM-YYYY]",required=True),
+    to_dt: Option(str,name="to",description="Range starting date. For Eg. 4-03-2022 [DD-MM-YYYY]",required=True),
+    type: Option(str,description="Type of data you want in chart.",required=True,choices=["Price","Market Cap.","Total Volume"]),
+    currency: Option(str,description="Conversion currency, If not specified it will default to first default currency",required=False,default=None)):
+        from_dt,to_dt = datetime.strptime(from_dt,"%d-%m-%Y").timestamp(),datetime.strptime(to_dt,"%d-%m-%Y").timestamp()
+        embed,img,imgName = cu.make_ranged_chart(id,currency,from_dt,to_dt,type,ctx.author.id,ctx.guild.id)
+        await ctx.respond(file=img,embed=embed)
+
+        await asyncio.sleep(2)
+        os.remove(f"./charts/{imgName}.png")
+        # list index , Value Error
 
 
 

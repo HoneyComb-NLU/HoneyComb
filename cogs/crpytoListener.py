@@ -61,6 +61,21 @@ class cryproListener(commands.Cog):
                 description="Please input **__Valid__** crypto/exchange id.",
                 color=discord.Color.red()
             ),ephemeral=True)
+        
+        elif isinstance(error.__context__,ValueError) and "time data" in str(error):
+            await ctx.respond(embed=discord.Embed(
+                title="Date Error!",
+                description="Please input **__Valid__** Date \n**Accepted Format: ** `DD-MM-YYYY`.",
+                color=discord.Color.red()
+            ),ephemeral=True)
+
+        elif isinstance(error.__context__,OSError) or isinstance(error.__context__,IndexError):
+            await ctx.respond(embed=discord.Embed(
+                title="Date Error!",
+                description="Please input **__Valid__ & __Sensible__** Date.",
+                color=discord.Color.red()
+            ),ephemeral=True)
+
 
         else:
             await self.bot.get_channel(int(osu.get("CONSOLE"))).send("** "+ ctx.guild.name + " →** `" + str(error) + "`")
