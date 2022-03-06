@@ -55,6 +55,13 @@ class cryproListener(commands.Cog):
                 color=discord.Color.red()
             ),ephemeral=True)
 
+        elif isinstance(error.__context__,discord.NotFound):
+            await ctx.respond(embed=discord.Embed(
+                title="Token Name Error",
+                description="Please input **__Valid__** crypto/exchange id.",
+                color=discord.Color.red()
+            ),ephemeral=True)
+
         else:
             await self.bot.get_channel(int(osu.get("CONSOLE"))).send("** "+ ctx.guild.name + " →** `" + str(error) + "`")
             log.error(str(error))

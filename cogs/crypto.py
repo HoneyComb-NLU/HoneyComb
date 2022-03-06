@@ -1,4 +1,5 @@
 from datetime import datetime
+from secrets import choice
 import utils.CryptoUtils as cu
 import utils.databaseUtils as dbu
 import discord
@@ -91,8 +92,6 @@ class Crypto(commands.Cog):
     currency: Option(str,description="Conversion currency, comma-separated if querying more than 1 currency. [/supported_currencies]",required=False),
     market_cap: Option(bool,description="Whether you want Market capitalization info of the coin(s)",required=False)):
         await ctx.respond(embed=cu.get_price(ctx.guild.id,id,currency,market_cap))
-   
-
 
     @slash_command(description="Get curcial data of the given coin.")
     @commands.cooldown(1,general_cooldown,commands.BucketType.user)
@@ -118,6 +117,20 @@ class Crypto(commands.Cog):
     currency: Option(str,description="Conversion currency, If not specified it will default to first default currency",required=False,default=None)):
                
         embed,img,imgName = cu.make_normal_chart(id,currency,days,type,ctx.author.id,ctx.guild.id)
+        await ctx.respond(file=img,embed=embed)
+
+        await asyncio.sleep(2)
+        os.remove(f"./charts/{imgName}.png")
+        # list index , Value Error
+
+    @slash_command(description="Get Chart of specified type.")
+    @commands.cooldown(1,general_cooldown,commands.BucketType.user)
+    async def ohlc_chart(self,ctx:discord.ApplicationContext, 
+    id: Option(str,description="Id of Coin [Only one]",required=True),
+    days: Option(str,description="No. of days you want to look back.",choices=['1','7','14','30','90','180','365',"Max"],required=True),
+    currency: Option(str,description="Conversion currency, If not specified it will default to first default currency",required=False,default=None)):
+               
+        embed,img,imgName = cu.make_ohlc_chart(id,currency,days,ctx.author.id,ctx.guild.id)
         await ctx.respond(file=img,embed=embed)
 
         await asyncio.sleep(2)

@@ -395,7 +395,30 @@ def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str,
 
     return embed,img,image_name
 
+def make_ohlc_chart(coin_id:str, vs_curr:str, days:str, user_id:str, guild_id:int):
+    coin_id = coin_id.replace(" ","-").lower()
+    
+    assert len(dbu.coin_id_check(coin_id)) != 0
 
+    embed = discord.Embed(
+        title=f"{dbu.get_coin_name(coin_id).capitalize()}'s OHLC Price for last `{days}` days",
+        color=discord.Color.gold(),
+        timestamp=datetime.now()
+    )
+    
+    # print(">" + coin_id)
+    if vs_curr == None:
+        vs_curr = dbu.get_default_currency(guild_id=guild_id)
+        vs_curr = str(vs_curr).replace(" ","").lower().split(",")[0]
+
+
+    image_name = f"{user_id}_{datetime.now().timestamp()}"
+    chrt.make_ohlc_chart(coin_id,vs_curr,days,image_name)
+
+    img = discord.File(f"./charts/{image_name}.png",filename=f"chart.png")
+    embed.set_image(url=f"attachment://chart.png")
+
+    return embed,img,image_name
 
 
 
