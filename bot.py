@@ -1,4 +1,5 @@
 from datetime import datetime
+from platform import platform
 import discord 
 from discord import file
 import utils.osUtils as osu
@@ -10,8 +11,15 @@ import utils.databaseUtils as dbu
 dgid = osu.get_debug_guilds()
 
 bot = discord.Bot(
-    activity=discord.Activity(type=discord.ActivityType.listening,name="Slash Commands ;-;"),
-    status=discord.Status.dnd,
+    # activity=discord.Activity(
+    #     type=discord.ActivityType.streaming,
+    #     name="Soon!",url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    # ),
+    activity=discord.Activity(
+        type=discord.ActivityType.streaming,
+        name="Soon!",url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    ),
+    status=discord.Status.idle,
     debug_guilds=dgid,
     owner_id=474589812192575488
 )
