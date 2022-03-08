@@ -57,16 +57,21 @@ def remove_guild(guild_id):
     dbCon.commit()
     dbCon.close()
 
-def coin_id_check(check_string:str):
+def coin_id_check(check_string:str): #smooth-love-portion
     dbCon = sqlite3.connect(osu.get_db())
     cur = dbCon.cursor()
     
     data = cur.execute(f"""SELECT * FROM coin_list 
     WHERE id = "{check_string}" COLLATE NOCASE""").fetchall()
+    if len(data) == 0:
+        check_string = check_string.replace("-"," ")
+        data = cur.execute(f"""SELECT id FROM coin_list 
+        WHERE name = "{check_string}" COLLATE NOCASE""").fetchall()
+    
 
     dbCon.commit()
     dbCon.close()
-    return data
+    return str(data[0][0])
 
 def supported_currency_check(check_string:str):
     dbCon = sqlite3.connect(osu.get_db())
@@ -119,4 +124,11 @@ def get_coin_name(coin_id:str):
         
     return str(data[0][0]) 
 
+def get_guild_nlu_channel(guild_id:int):
+    dbCon = sqlite3.connect(osu.get_db())
+    cur = dbCon.cursor()
 
+    data = cur.execute(f"SELECT nlu_channel_id FROM guilds WHERE guild_id = {guild_id}").fetchall()
+
+    dbCon.close()
+    return data[0][0]

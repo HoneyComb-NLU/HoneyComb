@@ -1,4 +1,5 @@
-import asyncio
+import asyncio,requests
+from pydoc import describe
 import discord
 from discord.ext import commands
 from discord.commands import slash_command,message_command,user_command
@@ -7,6 +8,7 @@ import utils.osUtils as osu
 import utils.databaseUtils as dbu
 from requests.exceptions import HTTPError
 import utils.consoleLogger as log
+
 
 nlu_url = osu.get_NLU_URL()
 
@@ -18,12 +20,14 @@ class cryproListener(commands.Cog):
     async def on_ready(self):
         # force_reload_nlu()
         cached_nlu_channels = dbu.get_nlu_channels()
-        print("Current Cached: " + str(cached_nlu_channels))
+        log.info("Current NLU Channels: " + str(cached_nlu_channels))
         cu.write_coin_list()
         cu.write_supported_currencies()
 
     @commands.Cog.listener()
     async def on_application_command_error(self,ctx,error):
+        log.error(str(error))
+        # ------------------------ Error Classification  ------------------------ #
         if isinstance(error, commands.CommandOnCooldown):            
             embed = discord.Embed(
                 title="Command Cooldown!",
@@ -54,6 +58,7 @@ class cryproListener(commands.Cog):
                 description="Please input **__Valid__** crypto/exchange id.",
                 color=discord.Color.red()
             ),ephemeral=True)
+            raise error
 
         elif isinstance(error.__context__,discord.NotFound):
             await ctx.respond(embed=discord.Embed(
@@ -78,12 +83,19 @@ class cryproListener(commands.Cog):
 
 
         else:
+            await ctx.respond(embed=discord.Embed(
+                title="Unexpected Error!",
+                description="Please Contact My Developers to get it Fixed!",
+                color=discord.Color.red()
+            ).add_field(name="<:honeycomb:939792285120483349> HiveMinds Discord Server",value="[Click Here to Join!](https://discord.gg/WSK3wRTYKw)"),
+            ephemeral=True)
             await self.bot.get_channel(int(osu.get("CONSOLE"))).send("** "+ ctx.guild.name + " →** `" + str(error) + "`")
             log.error(str(error))
             raise error
 
     @commands.Cog.listener()
-    async def on_message(self,message):
+    async def on_message(self,message:discord.Message):
+        # ------------------------ Checks ------------------------ #
         if message.author.bot or message.channel.type == discord.ChannelType.private or not dbu.check_nlu_channels(message.channel.id):
             return
 
@@ -94,13 +106,28 @@ class cryproListener(commands.Cog):
             await message.channel.edit(slowmode_delay=30)
             return
         
-        
-        # async with message.channel.typing():
-        # # simulate something heavy
-        #     # TODO:- main
-        #     await asyncio.sleep(3)
+        # ------------------------ NLU Resquest ------------------------ #
+        resp = requests.post(
+            nlu_url,
+            json={
+                'sender': message.author.id,
+                'message': message.content
+            }
+        ).json()[0]
+        # ------------------------ Intent Processing ------------------------ #
 
-        await message.channel.send(dbu.coin_id_check(message.content))
+        try:
+            intent = resp['custom']['intent']['name']
+        except KeyError:
+            await message.channel.send(resp['text'])
+            return -1
+
+
+        # async with message.channel.typing():    
+        if intent == "coin_search":
+            await message.channel.send(embed=cu.searching((resp['custom']['slots']['coins'][0])))
+        else:
+            print("Else Hit!")
         # Smooth Love Potion -> smooth-love-potion
 
 

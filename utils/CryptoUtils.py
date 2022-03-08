@@ -163,31 +163,27 @@ def get_price(guild_id:int,id:str,vs_currency:str=None,mkt_cap=False):
         vs_currency = dbu.get_default_currency(guild_id)
 
     id = id.replace(", ",",").replace(" ","-").lower()
+    
     vs_currency = str(vs_currency).replace(" ","").lower()
     id_list = id.split(",")
     vs_currency_list = vs_currency.split(",")
 
     # ---- Database Validation ---- #
-    try:
-        for e in id_list:
-            assert len(dbu.coin_id_check(e)) != 0,"Coin Id Mismatch : " + e
-            
-        for e in vs_currency_list:
-            assert len(dbu.supported_currency_check(e)) != 0,"Vs Currency Mismatch : " + e
+    for i in range(len(id_list)):
+        id_list[i] = dbu.coin_id_check(id_list[i])
+        assert id_list[i] != '',"Coin Id Mismatch : " + e
+        
+    for e in vs_currency_list:
+        assert len(dbu.supported_currency_check(e)) != 0,"Vs Currency Mismatch : " + e
 
-    except AssertionError as e: 
-        raise discord.ApplicationCommandInvokeError(e=e)
-
-
-
+    id = ','.join(id_list)
     # ----- Limit ------- #
     if id.count(',') >= 5 or vs_currency.count(",") >= 5:
         err = discord.Embed(title="Woaahh! Why are you so Data-Hungry...",description="You can only request up to **5** ids & **5** Exchange currencies at a time.",
         color=discord.Color.red(),timestamp=datetime.now())
         return err
-
-    data = cg.get_price(ids=id,vs_currencies=vs_currency,include_market_cap=mkt_cap)
     
+    data = cg.get_price(ids=id,vs_currencies=vs_currency,include_market_cap=mkt_cap)
     embed = discord.Embed(title="Here are the price(s) you asked!",color=discord.Color.gold(),timestamp=datetime.now())
     for i in id_list:
         tempLs = []
@@ -232,19 +228,17 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
     if vs_currency == None:
         vs_currency = dbu.get_default_currency(guild_id)
 
-    id = id.replace(" ","-").lower()
+    id = dbu.coin_id_check(id.replace(" ","-").lower())
     vs_currency = str(vs_currency).replace(" ","").lower()
     
     vs_currency_list = vs_currency.split(",")
     # TODO: give multiple currency support?
     # ---- Database Validation ---- #
-    try:
-        assert len(dbu.coin_id_check(id)) != 0,"Coin Id Mismatch : " + id
-        for e in vs_currency_list:
-            assert len(dbu.supported_currency_check(e)) != 0,"Vs Currency Mismatch : " + e
 
-    except AssertionError as er: 
-        raise discord.ApplicationCommandInvokeError(e=er)
+    assert len(id) != 0,"Coin Id Mismatch : " + id
+    for e in vs_currency_list:
+        assert len(dbu.supported_currency_check(e)) != 0,"Vs Currency Mismatch : " + e
+
     # ------- Main Stuff ------#
     data = cg.get_coin_by_id(id=id,localization="false",tickers=False,market_data=True,community_data=False,developer_data=False,sparkline=False)
     # ---- 1
@@ -371,9 +365,8 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
     return data_pages
 
 def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str, guild_id:int):
-    coin_id = coin_id.replace(" ","-").lower()
-    
-    assert len(dbu.coin_id_check(coin_id)) != 0
+    coin_id = dbu.coin_id_check(coin_id.replace(" ","-").lower())
+    assert len(coin_id) != 0
 
     embed = discord.Embed(
         title=f"{dbu.get_coin_name(coin_id).capitalize()}'s {type} for last `{days}` days",
@@ -396,9 +389,8 @@ def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str,
     return embed,img,image_name
 
 def make_ohlc_chart(coin_id:str, vs_curr:str, days:str, user_id:str, guild_id:int):
-    coin_id = coin_id.replace(" ","-").lower()
-    
-    assert len(dbu.coin_id_check(coin_id)) != 0
+    coin_id = dbu.coin_id_check(coin_id.replace(" ","-").lower())
+    assert len(coin_id) != 0
 
     embed = discord.Embed(
         title=f"{dbu.get_coin_name(coin_id).capitalize()}'s OHLC Price for last `{days}` days",
@@ -421,10 +413,9 @@ def make_ohlc_chart(coin_id:str, vs_curr:str, days:str, user_id:str, guild_id:in
     return embed,img,image_name
 
 def make_ranged_chart(coin_id:str, vs_curr:str, from_timedelta:int, to_timedelta:int, type:str, user_id:str, guild_id:int):
-    coin_id = coin_id.replace(" ","-").lower()
-    
-    assert len(dbu.coin_id_check(coin_id)) != 0
-    
+    coin_id = dbu.coin_id_check(coin_id.replace(" ","-").lower())
+    assert len(coin_id) != 0
+
     if vs_curr == None:
         vs_curr = dbu.get_default_currency(guild_id=guild_id)
         vs_curr = str(vs_curr).replace(" ","").lower().split(",")[0]

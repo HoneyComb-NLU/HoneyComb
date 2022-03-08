@@ -11,10 +11,6 @@ import utils.databaseUtils as dbu
 dgid = osu.get_debug_guilds()
 
 bot = discord.Bot(
-    # activity=discord.Activity(
-    #     type=discord.ActivityType.streaming,
-    #     name="Soon!",url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    # ),
     activity=discord.Activity(
         type=discord.ActivityType.streaming,
         name="Soon!",url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
@@ -38,7 +34,7 @@ def loadAllCogs():
 @bot.event
 async def on_ready():
     log.info(f"Logged on as : {bot.user.name}")
-    log.alert(f"Debug Guilds : {dgid}")
+    log.info(f"Debug Guilds : {dgid}")
 
 @bot.event
 async def on_guild_join(guild):
