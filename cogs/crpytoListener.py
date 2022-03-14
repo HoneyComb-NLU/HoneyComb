@@ -1,19 +1,20 @@
-import asyncio,requests
-from pydoc import describe
+import asyncio,requests,os
+from click import command
+from datetime import datetime
 import discord
-from discord.ext import commands
+from discord.ext import commands,pages
 from discord.commands import slash_command,message_command,user_command
 import utils.CryptoUtils as cu
 import utils.osUtils as osu
 import utils.databaseUtils as dbu
 from requests.exceptions import HTTPError
 import utils.consoleLogger as log
-
+from dateutil.relativedelta import relativedelta
 
 nlu_url = osu.get_NLU_URL()
 
 class cryproListener(commands.Cog):
-    def __init__(self,bot):
+    def __init__(self,bot:discord.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
@@ -107,30 +108,129 @@ class cryproListener(commands.Cog):
             return
         
         # ------------------------ NLU Resquest ------------------------ #
-        resp = requests.post(
-            nlu_url,
-            json={
-                'sender': message.author.id,
-                'message': message.content
-            }
-        ).json()[0]
-        # ------------------------ Intent Processing ------------------------ #
+        async with message.channel.typing():
+            try:
+                resp = requests.post(
+                    nlu_url,
+                    json={
+                        'sender': message.author.id,
+                        'message': message.content
+                    }
+                ).json()[0]['custom']
+            except IndexError:
+                try:
+                    resp = requests.post(
+                    nlu_url,
+                    json={
+                        'sender': message.author.id,
+                        'message': message.content
+                    }
+                    ).json()[0]
+                except IndexError:
+                    log.error("No Reply found for :`" + message.content +"`!!")
+                    return -1
+            # ------------------------ Intent Processing ------------------------ #
 
-        try:
-            intent = resp['custom']['intent']['name']
-        except KeyError:
-            await message.channel.send(resp['text'])
-            return -1
+            try:
+                intent = resp['intent']
+            except KeyError:
+                await message.channel.send(resp['text'])
+                return -1
+            
+            # async with message.channel.typing():    
+            if intent == "greet" or intent == "goodbye" or intent == "affirm" or intent == "deny" or intent == "mood_great" or intent == "mood_unhappy" or intent == "bot_challenge" or intent == "need_help":
+                await message.channel.send(resp['responses'])
+                
+            elif intent == "coin_search":
+                await message.channel.send(embed=cu.searching(resp['slots']['coins'][0]))
+            elif intent == "coin_data":
+                # if resp['slots']['currencies'] == []:
+                #     curr = None
+                # else:
+                #     curr = ",".join(resp['slots']['currencies'])#[1:-1]
+                
+                # resPaginator = pages.Paginator(
+                #     pages=list(cu.page_coin_details(guild_id=message.guild.id,id=resp['slots']['coins'][0],vs_currency=curr)),
+                #     timeout=60,
+                #     show_disabled=True,
+                #     show_indicator=True,
+                #     use_default_buttons=False,
+                #     custom_buttons=cu.get_Paginator_buttons()
+                # )
+                # ctx = await self.bot.get_context(message)
+                # await resPaginator.send(self.bot.get_application_context(message.interaction))
+                await message.channel.send("Develops are still working on bringing this feature for `NLU` mode, This is because The Paginator we provide doesn't support stand-alone operation.")
+                
+
+            elif intent == "simple_coin_price":
+                if resp['slots']['currencies'] == []:
+                    curr = None
+                else:
+                    curr = ",".join(resp['slots']['currencies'])#[1:-1]
+                
+                coins = ",".join(resp['slots']['coins'])
+                
+                await message.channel.send(
+                    embed=cu.get_price(
+                        message.guild.id,
+                        coins,
+                        curr
+                    )
+                )
+            elif intent == "chart":
+                
+                if resp['slots']['chart_type'] != 'ohlc':
+                    #Normal + ranged classifier
+                    if resp['slots']['time'] == {}:
+                        embed,imgFile,imgName=cu.make_normal_chart(
+                            coin_id=resp['slots']['coins'][0],
+                            vs_curr=resp['slots']['currencies'][0] if len(resp['slots']['currencies'])!= 0 else None,
+                            days = '1',type=resp['slots']['chart_type'],
+                            user_id=message.author.id,guild_id=message.guild.id
+                        )
+                        await message.channel.send(file=imgFile,embed=embed)
+
+                    elif type(resp['slots']['time']) == str:
+                        from_time = datetime.strptime(resp['slots']['time'][:-10],"%Y-%m-%dT%H:%M:%S")
+                        to_time = datetime.now()
+                        rldt = relativedelta(from_time,to_time)
+                        time = str(rldt.days)
+                        print(">>> " + time)
+                        embed,imgFile,imgName=cu.make_normal_chart(
+                            coin_id=resp['slots']['coins'][0],
+                            vs_curr=resp['slots']['currencies'][0] if len(resp['slots']['currencies'])!= 0 else None,
+                            days=time,type=resp['slots']['chart_type'],
+                            user_id=message.author.id,guild_id=message.guild.id
+                        )
+
+                        await message.channel.send(file=imgFile,embed=embed)
+
+                    else: 
+                        from_time = datetime.strptime(resp['slots']['time']['from'][:-10],"%Y-%m-%dT%H:%M:%S").timestamp()
+                        to_time = datetime.strptime(resp['slots']['time']['to'][:-10],"%Y-%m-%dT%H:%M:%S").timestamp()
+                        embed,imgFile,imgName=cu.make_ranged_chart(
+                                coin_id=resp['slots']['coins'][0],
+                                vs_curr=resp['slots']['currencies'][0] if len(resp['slots']['currencies'])!= 0 else None,
+                                from_timedelta=from_time,to_timedelta=to_time,
+                                type=resp['slots']['chart_type'],
+                                user_id=message.author.id,guild_id=message.guild.id
+                            )
+                        await message.channel.send(file=imgFile,embed=embed)
+                        
 
 
-        # async with message.channel.typing():    
-        if intent == "coin_search":
-            await message.channel.send(embed=cu.searching((resp['custom']['slots']['coins'][0])))
-        else:
-            print("Else Hit!")
+                else:
+                    #Ohlc caller
+                    pass
+
+
+                await asyncio.sleep(2)
+                os.remove(f"./charts/{imgName}.png")
+            
+            else:
+                await message.channel.send("Sorry, I am unable to get what you are saying! :(")
+
         # Smooth Love Potion -> smooth-love-potion
-
-
 
 
         

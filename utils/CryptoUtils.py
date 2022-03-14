@@ -171,10 +171,10 @@ def get_price(guild_id:int,id:str,vs_currency:str=None,mkt_cap=False):
     # ---- Database Validation ---- #
     for i in range(len(id_list)):
         id_list[i] = dbu.coin_id_check(id_list[i])
-        assert id_list[i] != '',"Coin Id Mismatch : " + e
+        assert id_list[i] != '',"Coin Id Mismatch : " + id_list[i]
         
     for e in vs_currency_list:
-        assert len(dbu.supported_currency_check(e)) != 0,"Vs Currency Mismatch : " + e
+        assert len(dbu.supported_currency_check(e)) != 0,"Vs Currency Mismatch" + e
 
     id = ','.join(id_list)
     # ----- Limit ------- #
