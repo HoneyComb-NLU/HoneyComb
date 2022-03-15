@@ -193,9 +193,9 @@ class cryproListener(commands.Cog):
                     elif type(resp['slots']['time']) == str:
                         from_time = datetime.strptime(resp['slots']['time'][:-10],"%Y-%m-%dT%H:%M:%S")
                         to_time = datetime.now()
-                        rldt = relativedelta(from_time,to_time)
+                        rldt = relativedelta(to_time,from_time)
                         time = str(rldt.days)
-                        print(">>> " + time)
+
                         embed,imgFile,imgName=cu.make_normal_chart(
                             coin_id=resp['slots']['coins'][0],
                             vs_curr=resp['slots']['currencies'][0] if len(resp['slots']['currencies'])!= 0 else None,
@@ -216,12 +216,25 @@ class cryproListener(commands.Cog):
                                 user_id=message.author.id,guild_id=message.guild.id
                             )
                         await message.channel.send(file=imgFile,embed=embed)
-                        
-
-
-                else:
+                      
+                elif resp['slots']['chart_type'] == 'ohlc':
                     #Ohlc caller
+                    from_time = datetime.strptime(resp['slots']['time']['from'][:-10],"%Y-%m-%dT%H:%M:%S")
+                    to_time = datetime.strptime(resp['slots']['time']['to'][:-10],"%Y-%m-%dT%H:%M:%S")
+                    rldt = relativedelta(to_time,from_time)
+                    time = str(rldt.days)
+                    # print(">>> "+ time)
+                    embed,imgFile,imgName=cu.make_ohlc_chart(
+                        coin_id=resp['slots']['coins'][0],
+                        vs_curr=resp['slots']['currencies'][0] if len(resp['slots']['currencies'])!= 0 else None,
+                        days=time,
+                        user_id=message.author.id,guild_id=message.guild.id
+                    )
+                    await message.channel.send(file=imgFile,embed=embed)
+
                     pass
+                else:
+                    log.error("Chart Type Mismatch!")
 
 
                 await asyncio.sleep(2)
