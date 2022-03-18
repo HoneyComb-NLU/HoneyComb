@@ -97,6 +97,9 @@ class cryproListener(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self,message:discord.Message):
         # ------------------------ Checks ------------------------ #
+        if message.type != discord.enums.MessageType.default or len(message.attachments) != 0:
+            return
+
         if message.author.bot or message.channel.type == discord.ChannelType.private or not dbu.check_nlu_channels(message.channel.id):
             return
 
@@ -137,8 +140,9 @@ class cryproListener(commands.Cog):
                 await message.channel.send(resp['text'])
                 return -1
             
-            # async with message.channel.typing():    
-            if intent == "greet" or intent == "goodbye" or intent == "affirm" or intent == "deny" or intent == "mood_great" or intent == "mood_unhappy" or intent == "bot_challenge" or intent == "need_help":
+            # async with message.channel.typing():  
+            int_list = ["greet", "goodbye", "affirm", "deny" ,"mood_great", "mood_unhappy","bot_challenge", "need_help", "chit_chat", "nlu_fallback"]  
+            if intent in int_list:
                 await message.channel.send(resp['responses'])
                 
             elif intent == "coin_search":
@@ -159,7 +163,7 @@ class cryproListener(commands.Cog):
                 # )
                 # ctx = await self.bot.get_context(message)
                 # await resPaginator.send(self.bot.get_application_context(message.interaction))
-                await message.channel.send("Develops are still working on bringing this feature for `NLU` mode, This is because The Paginator we provide doesn't support stand-alone operation.")
+                await message.channel.send("Develops are still working on bringing this feature for `NLU` mode, This is because the Paginator we provide doesn't support stand-alone operation yet.\n Until we work on bringing this feature to life, You can use `/coin_data` for the same! ")
                 
 
             elif intent == "simple_coin_price":
@@ -190,7 +194,7 @@ class cryproListener(commands.Cog):
                         )
                         await message.channel.send(file=imgFile,embed=embed)
 
-                    elif type(resp['slots']['time']) == str:
+                    elif type(resp['slots']['time']['to']) == None or type(resp['slots']['time']) == str:
                         from_time = datetime.strptime(resp['slots']['time'][:-10],"%Y-%m-%dT%H:%M:%S")
                         to_time = datetime.now()
                         rldt = relativedelta(to_time,from_time)
