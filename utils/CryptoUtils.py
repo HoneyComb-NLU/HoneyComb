@@ -402,7 +402,7 @@ def make_ohlc_chart(coin_id:str, vs_curr:str, days:str, user_id:str, guild_id:in
     if vs_curr == None:
         vs_curr = dbu.get_default_currency(guild_id=guild_id)
         vs_curr = str(vs_curr).replace(" ","").lower().split(",")[0]
-
+    vs_curr.lower()
 
     image_name = f"{user_id}_{datetime.now().timestamp()}"
     chrt.make_ohlc_chart(coin_id,vs_curr,days,image_name)
