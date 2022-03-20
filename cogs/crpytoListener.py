@@ -118,6 +118,7 @@ class cryproListener(commands.Cog):
             async for msg in self.bot.get_channel(int(osu.get("FUTURE_WORK"))).history(limit=20,oldest_first=True):
                 strlol += msg.content + "\n"
             await message.channel.send(strlol)
+            return
 
         # ------------------------ NLU Resquest ------------------------ #
         try:
@@ -216,8 +217,10 @@ class cryproListener(commands.Cog):
                         elif type(resp['slots']['time']['to']) == None or type(resp['slots']['time']) == str:
                             if type(resp['slots']['time']['to']) == None:
                                 from_time = datetime.strptime(resp['slots']['time']['from'][:-10],"%Y-%m-%dT%H:%M:%S")
+                                print("BRUUUUUHHHHHHH")
                             else:
                                 from_time = datetime.strptime(resp['slots']['time'][:-10],"%Y-%m-%dT%H:%M:%S")
+
                             to_time = datetime.now()
                             rldt = relativedelta(to_time,from_time)
                             time = str(rldt.days)
@@ -258,7 +261,6 @@ class cryproListener(commands.Cog):
                         )
                         await message.channel.send(file=imgFile,embed=embed)
 
-                        pass
                     else:
                         log.error("Chart Type Mismatch!")
                 except Exception as error:
