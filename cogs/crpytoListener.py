@@ -59,7 +59,7 @@ class cryproListener(commands.Cog):
         elif isinstance(error.__context__,AssertionError) or isinstance(error.__context__,KeyError) or isinstance(error.__context__,IndexError):
             await ctx.respond(embed=discord.Embed(
                 title="Data Error",
-                description="Please input **__Valid__** crypto/exchange id, Perhaps your entered data is Wrong!",
+                description="Please input **__Valid__** data, Perhaps your entered data is Wrong!",
                 color=discord.Color.red()
             ),ephemeral=True)
             raise error
