@@ -374,9 +374,9 @@ def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str,
         color=discord.Color.gold(),
         timestamp=datetime.now()
     )
-    if not (type(days) == str and days.lower() == "max"):
+    if not (days.isdigit() or days == "max"):
         raise OSError
-        
+
     # print(">" + coin_id)
     if vs_curr == None:
         vs_curr = dbu.get_default_currency(guild_id=guild_id)
