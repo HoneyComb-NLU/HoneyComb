@@ -206,7 +206,7 @@ class cryproListener(commands.Cog):
                     if len(resp['slots']['coins']) == 0:
                         await message.channel.send(random.choice(iterlol))
                         return
-                        
+
                     if resp['slots']['chart_type'] != 'ohlc':
                         #Normal + ranged classifier
                         
@@ -229,7 +229,7 @@ class cryproListener(commands.Cog):
                             to_time = datetime.now()
                             rldt = relativedelta(to_time,from_time)
                             time = str(rldt.days + (rldt.months*30) + (rldt.years*365))
-
+                            
                             embed,imgFile,imgName=cu.make_normal_chart(
                                 coin_id=resp['slots']['coins'][0],
                                 vs_curr=resp['slots']['currencies'][0] if len(resp['slots']['currencies'])!= 0 else None,
@@ -279,7 +279,7 @@ class cryproListener(commands.Cog):
                 except Exception as error:
                     await self.bot.get_channel(int(osu.get("CONSOLE"))).send("** "+ message.guild.name + " →** `" + str(error) + "`")
                     log.error(str(error))
-                    raise error
+                    # raise error
 
                 await asyncio.sleep(2)
                 os.remove(f"./charts/{imgName}.png")
