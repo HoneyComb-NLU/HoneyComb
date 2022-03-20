@@ -248,10 +248,14 @@ class cryproListener(commands.Cog):
                         
                     elif resp['slots']['chart_type'] == 'ohlc':
                         #Ohlc caller
-                        from_time = datetime.strptime(resp['slots']['time']['from'][:-10],"%Y-%m-%dT%H:%M:%S")
-                        to_time = datetime.strptime(resp['slots']['time']['to'][:-10],"%Y-%m-%dT%H:%M:%S")
-                        rldt = relativedelta(to_time,from_time)
-                        time = str(rldt.days)
+                        try:
+                            from_time = datetime.strptime(resp['slots']['time']['from'][:-10],"%Y-%m-%dT%H:%M:%S")
+                            to_time = datetime.strptime(resp['slots']['time']['to'][:-10],"%Y-%m-%dT%H:%M:%S")
+                            rldt = relativedelta(to_time,from_time)
+                            time = str(rldt.days + (rldt.months*30) + (rldt.years*365))
+                        except KeyError:
+                            time = 1
+
                         # print(">>> "+ time)
                         embed,imgFile,imgName=cu.make_ohlc_chart(
                             coin_id=resp['slots']['coins'][0],
