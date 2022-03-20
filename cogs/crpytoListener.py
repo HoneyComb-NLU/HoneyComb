@@ -1,5 +1,4 @@
-import asyncio,requests,os
-from click import command
+import asyncio,requests,os,random
 from datetime import datetime
 import discord
 from discord.ext import commands,pages
@@ -146,7 +145,15 @@ class cryproListener(commands.Cog):
             
         elif intent == "coin_search":
             async with message.channel.typing():
-                await message.channel.send(embed=cu.searching(resp['slots']['coins'][0]))
+                try:
+                    await message.channel.send(embed=cu.searching(resp['slots']['coins'][0]))
+                except IndexError as error:
+                    iterlol = [
+                        "Do you expect me to read your mind? Where the query at?",
+                        "You need to specify things for me to give you a proper answer.",
+                        "Yep! I can read you mind **Clearly!!**"
+                    ]
+                    await message.channel.send(random.choice(iterlol))
         elif intent == "coin_data":
             # if resp['slots']['currencies'] == []:
             #     curr = None
