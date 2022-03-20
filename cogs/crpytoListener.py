@@ -11,7 +11,11 @@ import utils.consoleLogger as log
 from dateutil.relativedelta import relativedelta
 
 nlu_url = osu.get_NLU_URL()
-
+iterlol = [
+    "Do you expect me to read your mind? Where the query at?",
+    "You need to specify things for me to give you a proper answer.",
+    "Yep! I can read you mind **Clearly!!**"
+]
 class cryproListener(commands.Cog):
     def __init__(self,bot:discord.Bot):
         self.bot = bot
@@ -148,11 +152,6 @@ class cryproListener(commands.Cog):
                 try:
                     await message.channel.send(embed=cu.searching(resp['slots']['coins'][0]))
                 except IndexError as error:
-                    iterlol = [
-                        "Do you expect me to read your mind? Where the query at?",
-                        "You need to specify things for me to give you a proper answer.",
-                        "Yep! I can read you mind **Clearly!!**"
-                    ]
                     await message.channel.send(random.choice(iterlol))
         elif intent == "coin_data":
             # if resp['slots']['currencies'] == []:
@@ -180,8 +179,12 @@ class cryproListener(commands.Cog):
                 else:
                     curr = ",".join(resp['slots']['currencies'])#[1:-1]
                 
+                if len(resp['slots']['coins']) == 0:
+                    await message.channel.send(random.choice(iterlol))
+                    return
+
                 coins = ",".join(resp['slots']['coins'])
-                
+
                 await message.channel.send(
                     embed=cu.get_price(
                         message.guild.id,
@@ -254,7 +257,15 @@ class cryproListener(commands.Cog):
 
                 await asyncio.sleep(2)
                 os.remove(f"./charts/{imgName}.png")
-            
+        
+        elif intent == "global_holdings":
+            if len(resp['slots']['coins']) == 0:
+                await message.channel.send(random.choice(iterlol))
+                return
+
+            coins = ",".join(resp['slots']['coins'])
+            await message.channel.send(embed=cu.get_top_company_holdings(coin_id=coins))
+
         else:
             await message.channel.send("Sorry, I am unable to get what you are saying! :(")
 
