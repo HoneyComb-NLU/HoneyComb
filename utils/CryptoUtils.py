@@ -365,6 +365,7 @@ def page_coin_details(guild_id:int,id:str,vs_currency:str):
     return data_pages
 
 def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str, guild_id:int):
+    
     coin_id = dbu.coin_id_check(coin_id.replace(" ","-").lower())
     assert len(coin_id) != 0
 
@@ -373,7 +374,9 @@ def make_normal_chart(coin_id:str, vs_curr:str, days:str, type:str, user_id:str,
         color=discord.Color.gold(),
         timestamp=datetime.now()
     )
-    
+    if not (type(days) == str and days.lower() == "max"):
+        raise OSError
+        
     # print(">" + coin_id)
     if vs_curr == None:
         vs_curr = dbu.get_default_currency(guild_id=guild_id)

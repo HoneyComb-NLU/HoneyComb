@@ -56,7 +56,7 @@ class cryproListener(commands.Cog):
             )
             await ctx.respond(embed=embed,ephemeral=True)
 
-        elif isinstance(error.__context__,AssertionError) or isinstance(error.__context__,KeyError):
+        elif isinstance(error.__context__,AssertionError) or isinstance(error.__context__,KeyError) or isinstance(error.__context__,IndexError):
             await ctx.respond(embed=discord.Embed(
                 title="Token Name Error",
                 description="Please input **__Valid__** crypto/exchange id.",
@@ -78,7 +78,7 @@ class cryproListener(commands.Cog):
                 color=discord.Color.red()
             ),ephemeral=True)
 
-        elif isinstance(error.__context__,OSError) or isinstance(error.__context__,IndexError):
+        elif isinstance(error.__context__,OSError):
             await ctx.respond(embed=discord.Embed(
                 title="Date Error!",
                 description="Please input **__Valid__ & __Sensible__** Date.",
