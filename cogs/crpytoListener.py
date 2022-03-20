@@ -14,7 +14,7 @@ nlu_url = osu.get_NLU_URL()
 iterlol = [
     "Do you expect me to read your mind? Where the query at?",
     "You need to specify things for me to give you a proper answer.",
-    "Yep! I can read you mind **Clearly!!**"
+    "Yep! I can read your mind **Clearly!!**"
 ]
 class cryproListener(commands.Cog):
     def __init__(self,bot:discord.Bot):
