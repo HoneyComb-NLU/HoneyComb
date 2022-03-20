@@ -214,16 +214,16 @@ class cryproListener(commands.Cog):
                             )
                             await message.channel.send(file=imgFile,embed=embed)
 
-                        elif type(resp['slots']['time']['to']) == None or type(resp['slots']['time']) == str:
-                            if type(resp['slots']['time']['to']) == None:
+                        elif resp['slots']['time']['to'] == None or type(resp['slots']['time']) == str:
+                            if resp['slots']['time']['to'] == None:
                                 from_time = datetime.strptime(resp['slots']['time']['from'][:-10],"%Y-%m-%dT%H:%M:%S")
-                                print("BRUUUUUHHHHHHH")
+                                
                             else:
                                 from_time = datetime.strptime(resp['slots']['time'][:-10],"%Y-%m-%dT%H:%M:%S")
 
                             to_time = datetime.now()
                             rldt = relativedelta(to_time,from_time)
-                            time = str(rldt.days)
+                            time = str(rldt.days + (rldt.months*30) + (rldt.years*365))
 
                             embed,imgFile,imgName=cu.make_normal_chart(
                                 coin_id=resp['slots']['coins'][0],
@@ -263,9 +263,11 @@ class cryproListener(commands.Cog):
 
                     else:
                         log.error("Chart Type Mismatch!")
+
                 except Exception as error:
                     await self.bot.get_channel(int(osu.get("CONSOLE"))).send("** "+ message.guild.name + " →** `" + str(error) + "`")
                     log.error(str(error))
+                    raise error
 
                 await asyncio.sleep(2)
                 os.remove(f"./charts/{imgName}.png")
