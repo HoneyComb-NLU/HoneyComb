@@ -8,9 +8,8 @@ from discord.ext import commands,pages
 from tabulate import tabulate as tb
 import asyncio,os
 
-# Chart_url = "https://quickcharts.io/charts?c="
 
-general_cooldown = 1
+general_cooldown = 30
 
 class Crypto(commands.Cog):
     def __init__(self,bot):

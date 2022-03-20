@@ -113,6 +113,12 @@ class cryproListener(commands.Cog):
             await message.channel.edit(slowmode_delay=30)
             return
         
+        if "future work" in message.content.lower() or "future plans" in message.content.lower():
+            strlol = ''
+            async for msg in self.bot.get_channel(int(osu.get("FUTURE_WORK"))).history(limit=20,oldest_first=True):
+                strlol += msg.content + "\n"
+            await message.channel.send(strlol)
+
         # ------------------------ NLU Resquest ------------------------ #
         try:
             resp = requests.post(
@@ -145,6 +151,7 @@ class cryproListener(commands.Cog):
         # async with message.channel.typing():  
         int_list = ["greet", "goodbye", "affirm", "deny" ,"mood_great", "mood_unhappy","bot_challenge", "need_help", "chit_chat", "nlu_fallback"]  
         if intent in int_list:
+            await asyncio.sleep(1.5)
             await message.channel.send(resp['responses'])
             
         elif intent == "coin_search":
@@ -169,7 +176,7 @@ class cryproListener(commands.Cog):
             # )
             # ctx = await self.bot.get_context(message)
             # await resPaginator.send(self.bot.get_application_context(message.interaction))
-            await message.channel.send("Develops are still working on bringing this feature for `NLU` mode, This is because the Paginator we provide doesn't support stand-alone operation yet.\n Until we work on bringing this feature to life, You can use `/coin_data` for the same! ")
+            await message.channel.send("Develops are still working on bringing this feature for `NLU` mode, This is because the Paginator we provide doesn't support stand-alone operation yet.\nUntil we work on bringing this feature to life, You can use `/coin_data` for the same! ")
             
 
         elif intent == "simple_coin_price":
@@ -207,7 +214,10 @@ class cryproListener(commands.Cog):
                             await message.channel.send(file=imgFile,embed=embed)
 
                         elif type(resp['slots']['time']['to']) == None or type(resp['slots']['time']) == str:
-                            from_time = datetime.strptime(resp['slots']['time'][:-10],"%Y-%m-%dT%H:%M:%S")
+                            if type(resp['slots']['time']['to']) == None:
+                                from_time = datetime.strptime(resp['slots']['time']['from'][:-10],"%Y-%m-%dT%H:%M:%S")
+                            else:
+                                from_time = datetime.strptime(resp['slots']['time'][:-10],"%Y-%m-%dT%H:%M:%S")
                             to_time = datetime.now()
                             rldt = relativedelta(to_time,from_time)
                             time = str(rldt.days)
