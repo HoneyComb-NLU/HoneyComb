@@ -203,8 +203,13 @@ class cryproListener(commands.Cog):
         elif intent == "chart":
             async with message.channel.typing():
                 try:
+                    if len(resp['slots']['coins']) == 0:
+                        await message.channel.send(random.choice(iterlol))
+                        return
+                        
                     if resp['slots']['chart_type'] != 'ohlc':
                         #Normal + ranged classifier
+                        
                         if resp['slots']['time'] == {}:
                             embed,imgFile,imgName=cu.make_normal_chart(
                                 coin_id=resp['slots']['coins'][0],
