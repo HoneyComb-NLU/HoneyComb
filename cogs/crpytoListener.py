@@ -254,7 +254,7 @@ class cryproListener(commands.Cog):
                             to_time = datetime.now()
                             rldt = relativedelta(to_time,from_time)
                             time = str(rldt.days + (rldt.months*30) + (rldt.years*365))
-                            time = "max" if int(time) > 365 else min([1,7,14,30,90,180,365], key=lambda x:abs(x-time))
+                            time = "max" if int(time) > 365 else min([1,7,14,30,90,180,365], key=lambda x:abs(x-int(time)))
 
                         except KeyError:
                             time = 1
