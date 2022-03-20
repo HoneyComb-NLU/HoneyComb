@@ -250,9 +250,12 @@ class cryproListener(commands.Cog):
                         #Ohlc caller
                         try:
                             from_time = datetime.strptime(resp['slots']['time']['from'][:-10],"%Y-%m-%dT%H:%M:%S")
-                            to_time = datetime.strptime(resp['slots']['time']['to'][:-10],"%Y-%m-%dT%H:%M:%S")
+                            # to_time = datetime.strptime(resp['slots']['time']['to'][:-10],"%Y-%m-%dT%H:%M:%S")
+                            to_time = datetime.now()
                             rldt = relativedelta(to_time,from_time)
                             time = str(rldt.days + (rldt.months*30) + (rldt.years*365))
+                            time = "max" if time > 365 else min([1,7,14,30,90,180,365], key=lambda x:abs(x-time))
+                            
                         except KeyError:
                             time = 1
 
