@@ -153,7 +153,7 @@ class cryproListener(commands.Cog):
         int_list = ["greet", "goodbye", "affirm", "deny" ,"mood_great", "mood_unhappy","bot_challenge", "need_help", "chit_chat", "nlu_fallback"]  
         if intent in int_list:
             await asyncio.sleep(1.5)
-            await message.channel.send(resp['responses'])
+            await message.channel.send(resp['responses'],reference=message,mention_author=False)
             
         elif intent == "coin_search":
             async with message.channel.typing():
